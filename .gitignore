@@ -1,0 +1,15 @@
+# Logs
+logs
+*.log
+
+# Dependency directory
+node_modules
+
+# WebStorm configuration
+.idea
+
+**/*-gitignore/**
+/*.tgz
+/library
+/module
+/example/index.js

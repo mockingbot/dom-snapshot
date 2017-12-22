@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test DOM Snapshot</title>
+  <link rel="stylesheet" href="resource/font/index.css">
+  <link rel="stylesheet" href="resource/reset.css">
+  <style>
+    #root { overflow: auto; width: 100vw; min-height: 100vh; }
+
+    .flex-column-center { display: flex; flex-flow: column wrap; align-items: center; justify-content: center;}
+
+    /* test inline style */
+    #source { overflow: hidden; width: 400px; height: 400px; border: 1px solid #ddd; }
+
+    .circle { border-radius: 100%; box-shadow: 0 0 0 5px hsl(0, 0%, 20%), 0 0 0 10px hsl(0, 50%, 50%), 0 0 15px 15px hsl(0, 0%, 0%); }
+  </style>
+</head>
+<body>
+<div id="root" class="flex-column-center">
+  <b>Source</b>
+  <div id="source">
+    <p style="font-family: 'DrCoder';">Test Font DrCoder</p>
+    <hr />
+    <p style="font-family: 'Roboto';">Test Font Roboto</p>
+    <hr />
+    <p style="font-family: 'Material Icons';">bug_report</p>
+    <p style="font-family: 'Material Icons';">lightbulb_outline</p>
+    <hr />
+    <div class="circle" style="width: 48px; height: 48px;  background-image: url('resource/Test Image.png')"></div>
+    <hr />
+    <div style="width: 48px; height: 48px;  background-image: url('resource/Test Image.png')"></div>
+    <hr />
+    <img src="resource/Test%20Image.png">
+  </div>
+
+  <b>Output</b>
+  <canvas id="output-canvas">CANVAS</canvas>
+
+  <pre id="output-status"></pre>
+
+  <button onclick="doSnapshot()">Generate</button>
+  <button id="download-svg" disabled>Download SVG</button>
+  <button id="download-png" disabled>Download PNG</button>
+</div>
+<script src="../node_modules/dr-js/library/Dr.js"></script>
+<script src="index.js"></script>
+<script>
+  const { Common: { Format } } = window.Dr
+  const { Download, createHTMLFragCollector, getCanvasFromDOMFrag } = window.DOM_SNAPSHOT
+
+  const sizeOfString = (string) => `${Format.binary(new window.Blob([ string ]).size)}B`
+
+  const generate = async ({ htmlSourceList, width, height }) => {
+    const { getOutput, collect } = createHTMLFragCollector()
+    htmlSourceList.forEach(collect)
+    const { htmlFragList, urlMap } = getOutput()
+    console.log('[generate]', { htmlFragList, urlMap })
+
+    const cssLinkHrefList = Array.from(document.getElementsByTagName('link'))
+      .map((element) => (element.rel === 'stylesheet' && element.href))
+      .filter((href) => href)
+    const cssFragList = Array.from(document.getElementsByTagName('style'))
+      .map((element) => element.innerHTML)
+
+    return getCanvasFromDOMFrag({
+      urlMap, htmlFragList,
+      cssLinkHrefList, cssFragList,
+      width, height
+    })
+  }
+
+  const qS = (selector) => document.querySelector(selector)
+
+  window.doSnapshot = () => {
+    const htmlSourceList = new XMLSerializer().serializeToString(qS('#source')).split('\n')
+    console.log('[doSnapshot]', { htmlSourceList })
+
+    generate({ htmlSourceList, width: 400, height: 400 }).then(({
+      htmlString,
+      cssString,
+      domString,
+      svgString,
+      imageElement,
+      canvasElement
+    }) => {
+      console.log('[doSnapshot]', { imageElement, canvasElement })
+
+      const pngDataUrl = canvasElement.toDataURL()
+
+      qS('#output-status').innerHTML = [
+        `htmlString: ${sizeOfString(htmlString)}`,
+        `cssString: ${sizeOfString(cssString)}`,
+        `domString: ${sizeOfString(domString)}`,
+        `svgString: ${sizeOfString(svgString)}`,
+        `pngDataUrl: ${sizeOfString(pngDataUrl)}`
+      ].join('\n')
+
+      qS('#output-canvas').width = 400
+      qS('#output-canvas').height = 400
+      qS('#output-canvas').getContext('2d').drawImage(canvasElement, 0, 0)
+
+      qS('#download-svg').disabled = false
+      qS('#download-svg').onclick = () => Download.createDownloadBlob('output.svg', [ svgString ])
+
+      qS('#download-png').disabled = false
+      qS('#download-png').onclick = () => Download.createDownloadUrl('output.png', pngDataUrl)
+    })
+  }
+</script>
+</body>
+</html>
