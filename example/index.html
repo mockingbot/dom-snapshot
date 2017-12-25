@@ -36,76 +36,54 @@
 
   <b>Output</b>
   <canvas id="output-canvas">CANVAS</canvas>
-
   <pre id="output-status"></pre>
-
-  <button onclick="doSnapshot()">Generate</button>
+  <button onclick="window.doSnapshot()">doSnapshot</button>
+  <button onclick="window.resetFetchCache()">resetFetchCache</button>
   <button id="download-svg" disabled>Download SVG</button>
   <button id="download-png" disabled>Download PNG</button>
 </div>
 <script src="../node_modules/dr-js/library/Dr.js"></script>
 <script src="index.js"></script>
 <script>
-  const { Common: { Format } } = window.Dr
-  const { Download, createHTMLFragCollector, getCanvasFromDOMFrag } = window.DOM_SNAPSHOT
-
-  const sizeOfString = (string) => `${Format.binary(new window.Blob([ string ]).size)}B`
-
-  const generate = async ({ htmlSourceList, width, height }) => {
-    const { getOutput, collect } = createHTMLFragCollector()
-    htmlSourceList.forEach(collect)
-    const { htmlFragList, urlMap } = getOutput()
-    console.log('[generate]', { htmlFragList, urlMap })
-
-    const cssLinkHrefList = Array.from(document.getElementsByTagName('link'))
-      .map((element) => (element.rel === 'stylesheet' && element.href))
-      .filter((href) => href)
-    const cssFragList = Array.from(document.getElementsByTagName('style'))
-      .map((element) => element.innerHTML)
-
-    return getCanvasFromDOMFrag({
-      urlMap, htmlFragList,
-      cssLinkHrefList, cssFragList,
-      width, height
-    })
-  }
+  const {
+    Dr: { Common: { Format, Time } },
+    DOM_SNAPSHOT: { Fetch, Download, createSnapshotFromElement }
+  } = window
 
   const qS = (selector) => document.querySelector(selector)
+  const sizeOfString = (string) => `${Format.binary(new window.Blob([ string ]).size)}B`
 
+  window.resetFetchCache = () => Fetch.resetFetchCache()
   window.doSnapshot = () => {
-    const htmlSourceList = new XMLSerializer().serializeToString(qS('#source')).split('\n')
-    console.log('[doSnapshot]', { htmlSourceList })
+    qS('#output-canvas').height = 0
 
-    generate({ htmlSourceList, width: 400, height: 400 }).then(({
-      htmlString,
-      cssString,
-      domString,
-      svgString,
-      imageElement,
-      canvasElement
-    }) => {
-      console.log('[doSnapshot]', { imageElement, canvasElement })
+    const timeStart = Time.clock()
 
-      const pngDataUrl = canvasElement.toDataURL()
+    createSnapshotFromElement(qS('#source'))
+      .then(({ htmlString, cssString, domString, svgString, imageElement, canvasElement }) => {
+        console.log('[doSnapshot]', { imageElement, canvasElement })
 
-      qS('#output-status').innerHTML = [
-        `htmlString: ${sizeOfString(htmlString)}`,
-        `cssString: ${sizeOfString(cssString)}`,
-        `domString: ${sizeOfString(domString)}`,
-        `svgString: ${sizeOfString(svgString)}`,
-        `pngDataUrl: ${sizeOfString(pngDataUrl)}`
-      ].join('\n')
+        const pngDataUrl = canvasElement.toDataURL()
 
-      qS('#output-canvas').width = 400
-      qS('#output-canvas').height = 400
-      qS('#output-canvas').getContext('2d').drawImage(canvasElement, 0, 0)
+        qS('#output-status').innerHTML = [
+          `time: ${Format.time(Time.clock() - timeStart)}`,
+          `htmlString: ${sizeOfString(htmlString)}`,
+          `cssString: ${sizeOfString(cssString)}`,
+          `domString: ${sizeOfString(domString)}`,
+          `svgString: ${sizeOfString(svgString)}`,
+          `pngDataUrl: ${sizeOfString(pngDataUrl)}`
+        ].join('\n')
 
-      qS('#download-svg').disabled = false
-      qS('#download-svg').onclick = () => Download.createDownloadBlob('output.svg', [ svgString ])
+        qS('#output-canvas').width = 400
+        qS('#output-canvas').height = 400
+        qS('#output-canvas').getContext('2d').drawImage(canvasElement, 0, 0)
 
-      qS('#download-png').disabled = false
-      qS('#download-png').onclick = () => Download.createDownloadUrl('output.png', pngDataUrl)
-    })
+        qS('#download-svg').disabled = false
+        qS('#download-svg').onclick = () => Download.createDownloadBlob('output.svg', [ svgString ])
+
+        qS('#download-png').disabled = false
+        qS('#download-png').onclick = () => Download.createDownloadUrl('output.png', pngDataUrl)
+      })
   }
 </script>
 </body>

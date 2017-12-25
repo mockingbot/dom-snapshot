@@ -1,6 +1,6 @@
 {
   "name": "dom-snapshot",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "author": "mockingbot",
   "license": "MIT",
   "description": "Get `<canvas>` from DOM string through SVG `<foreignObject>`.",
@@ -28,7 +28,8 @@
     "build-module": "cross-env NODE_ENV=production BABEL_ENV=module babel ./source --out-dir ./module --ignore test.js",
     "build-example": "cross-env NODE_ENV=development webpack --config .webpackrc.js --watch",
     "prepack": "npm run build",
-    "publish-dev": "npm publish --tag dev"
+    "publish-latest": "npm publish --userconfig ~/thatbean.npmrc",
+    "publish-dev": "npm publish --tag dev --userconfig ~/thatbean.npmrc"
   },
   "engines": {
     "node": ">=8.8.0",
