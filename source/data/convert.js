@@ -28,19 +28,19 @@ const inlineCSSFont = async (cssString, originUrl) => {
   const fragList = []
   let stringIndex = 0
   let execResult
-  while ((execResult = REGEXP_FONT_WOFF.exec(cssString))) {
+  while ((execResult = REGEXP_FONT_URL.exec(cssString))) {
     let fontSrc = getAbsoluteUrl(execResult[ 0 ], originUrl)
     fragList.push(cssString.slice(stringIndex, execResult.index))
     fragList.push(await fetchDataUrlWithCache(fontSrc)) // to be replaced
-    stringIndex = REGEXP_FONT_WOFF.lastIndex
+    stringIndex = REGEXP_FONT_URL.lastIndex
     // __DEV__ && console.log('get fontSrc:', fontSrc, fontMIME)
   }
   if (!fragList.length) return Promise.resolve(cssString) // nothing
   fragList.push(cssString.slice(stringIndex)) // left string
   return fragList.join('')
 }
-// match woff/woff2 font check http://regexr.com/3g7k5
-const REGEXP_FONT_WOFF = /((((https?:\/\/)?www\.)?[-\w@:%._+~#=]{2,256}\.[a-z]{2,4})?\/)?(\.?\.\/)*\b[-\w@:%_+.~#?&/=]+.(woff2?)([?#][-\w%._#=]{1,256})?/g
+// match woff2/woff/ttf font check https://regexr.com/3if5n
+const REGEXP_FONT_URL = /\/?(\.?\.\/)*\b[-\w@:%_+.~#?&/=]+.(woff2|woff|ttf)([?#][-\w%._#=]{1,256})?/g
 
 const getAbsoluteUrl = (url, originUrl) => {
   if (REGEXP_HOST_DOMAIN.exec(url)) return url // already absolute url
@@ -53,7 +53,7 @@ const getAbsoluteUrl = (url, originUrl) => {
   __DEV__ && console.log('[getAbsoluteUrl]', { url, domain, rawList, reducedList })
   return reducedList.join('/')
 }
-// match one valid domain, with port, not localhost, not IP, check http://regexr.com/3fucf
-const REGEXP_HOST_DOMAIN = /((https?:)?\/\/)?[-\w@:%._+~#=]{2,256}\.[a-z]{2,4}(:\d{1,5})?\//
+// match one valid domain, with port, not localhost, not IP, check https://regexr.com/3if55
+const REGEXP_HOST_DOMAIN = /((https?:)?\/\/)?[-\w@:%._+~#=]{2,256}\.[a-z]{2,63}(:\d{1,5})?\//
 
 export { convertDataUrl, inlineCSSFont }

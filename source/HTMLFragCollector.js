@@ -13,31 +13,33 @@ const createHTMLFragCollector = () => {
   let urlMap = {
     // [urlString]: { urlString: '', dataUrl: 'will have data after fetch' } // url to load
   }
-  const getOutput = () => {
-    const output = { htmlFragList, urlMap }
-    htmlFragList = []
-    urlMap = {}
-    return output
-  }
 
-  const collectUrl = (urlString) => {
+  const replaceUrl = (urlString) => {
     if (urlMap[ urlString ] === undefined) urlMap[ urlString ] = { urlString, dataUrl: '' }
     return urlMap[ urlString ]
   }
+
   const collectImageTagSrc = createCollector(REGEXP_IMAGE_TAG, REGEXP_IMAGE_TAG_SRC) // collect <img src="URL">
   const collectStyleInlineUrl = createCollector(REGEXP_INLINE_STYLE, REGEXP_INLINE_STYLE_URL) // collect <div style="background: url(URL);" />
-  const collect = (fragString) => {
-    __DEV__ && console.log('[collect] fragString:', fragString)
-    let collectFragList = [ fragString ]
-    collectFragList = collectFragList.reduce((fragList, frag) => collectImageTagSrc(fragList, frag, collectUrl), [])
-    collectFragList = collectFragList.reduce((fragList, frag) => collectStyleInlineUrl(fragList, frag, collectUrl), [])
-    htmlFragList = htmlFragList.concat(collectFragList)
-  }
 
-  return { getOutput, collect }
+  return {
+    getOutput: () => {
+      const output = { htmlFragList, urlMap }
+      htmlFragList = []
+      urlMap = {}
+      return output
+    },
+    collect: (fragString) => {
+      // __DEV__ && console.log('[collect] fragString:', fragString)
+      let collectFragList = [ fragString ]
+      collectFragList = collectFragList.reduce((fragList, frag) => collectImageTagSrc(fragList, frag, replaceUrl), [])
+      collectFragList = collectFragList.reduce((fragList, frag) => collectStyleInlineUrl(fragList, frag, replaceUrl), [])
+      htmlFragList = htmlFragList.concat(collectFragList)
+    }
+  }
 }
 
-const createCollector = (regexpSearchBlock, regexpExtractUrl) => (fragList, frag, collectUrl) => {
+const createCollector = (regexpSearchBlock, regexpExtractUrl) => (fragList, frag, replaceUrl) => {
   if (typeof (frag) === 'object') {
     __DEV__ && console.log('[collector] get object frag', frag)
     fragList.push(frag)
@@ -54,7 +56,7 @@ const createCollector = (regexpSearchBlock, regexpExtractUrl) => (fragList, frag
     const urlIndex = searchResult.index + extractResult.index + extractResult[ 0 ].indexOf(urlString)
     const preUrlFrag = frag.slice(currentIndex, urlIndex)
     fragList.push(preUrlFrag)
-    fragList.push(collectUrl(urlString))
+    fragList.push(replaceUrl(urlString))
     currentIndex = urlIndex + urlString.length
   }
   fragList.push(frag.substr(currentIndex))

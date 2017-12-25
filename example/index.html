@@ -8,6 +8,8 @@
   <style>
     #root { overflow: auto; padding: 24px; width: 100vw; min-height: 100vh; display: flex; flex-flow: column; align-items: center; }
 
+    .box { padding: 16px; }
+
     .flex-row { display: flex; }
 
     .flex-column { display: flex; flex-flow: column; }
@@ -21,16 +23,16 @@
 <body>
 <div id="root" class="flex-column">
   <div class="flex-row">
-    <div class="flex-column">
+    <div class="flex-column box">
       <button onclick="window.doSnapshot()">doSnapshot</button>
       <button onclick="window.resetFetchCache()">resetFetchCache</button>
       <button id="download-svg" disabled>Download SVG</button>
       <button id="download-png" disabled>Download PNG</button>
     </div>
-    <pre id="output-status"></pre>
+    <pre id="output-status" class="box"></pre>
   </div>
   <div class="flex-row">
-    <div class="flex-column">
+    <div class="flex-column box">
       <b>Source</b>
       <div id="source">
         <p style="font-family: 'DrCoder';">Test Font DrCoder</p>
@@ -47,13 +49,13 @@
         <img src="resource/Test%20Image.png">
       </div>
     </div>
-    <div class="flex-column">
+    <div class="flex-column box">
       <b>Output</b>
-      <canvas id="output-canvas" height="0">CANVAS</canvas>
+      <canvas id="output-canvas" width="400" height="0">CANVAS</canvas>
     </div>
   </div>
 </div>
-<script src="../node_modules/dr-js/library/Dr.js"></script>
+<script src="https://unpkg.com/dr-js/library/Dr.js"></script>
 <script src="index.js"></script>
 <script>
   const {
