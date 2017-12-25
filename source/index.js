@@ -17,6 +17,7 @@ const createSnapshotFromHTMLSourceList = async ({ htmlSourceList, width, height 
     .map((element) => element.innerHTML)
 
   let htmlString, cssString, domString, svgString, imageElement, canvasElement
+  const packResult = () => ({ htmlString, cssString, domString, svgString, imageElement, canvasElement })
   try {
     htmlString = await prepareHTMLString(urlMap, htmlFragList)
     cssString = await prepareCSSString(cssLinkHrefList, cssFragList)
@@ -24,17 +25,18 @@ const createSnapshotFromHTMLSourceList = async ({ htmlSourceList, width, height 
     svgString = await prepareSVGString({ domString, width, height })
     imageElement = await prepareImageElement({ svgString, width, height })
     canvasElement = await prepareCanvasElement({ imageElement, width, height })
-    return { htmlString, cssString, domString, svgString, imageElement, canvasElement }
-  } catch (error) {
-    __DEV__ && console.warn('[createSnapshotFromHTMLSourceList] error:', error, { htmlString, cssString, domString, svgString, imageElement, canvasElement })
-    return {}
-  }
+  } catch (error) { __DEV__ && console.warn('[createSnapshotFromHTMLSourceList] error:', error, packResult()) }
+  return packResult()
 }
 
-const createSnapshotFromElement = async (element) => {
+const createSnapshotFromElement = async (element, width, height) => {
+  width = width || parseInt(element.style.width) || element.offsetWidth
+  height = height || parseInt(element.style.height) || element.offsetHeight
+  if (!width || !height) throw new Error(`[createSnapshotFromElement] invalid output size: width: ${width}, height: ${height}`)
+
   const htmlSourceList = new window.XMLSerializer().serializeToString(element).split('\n')
-  const { offsetWidth: width, offsetHeight: height } = element
-  console.log('[createSnapshotFromElement]', { htmlSourceList, width, height })
+  __DEV__ && console.log('[createSnapshotFromElement]', { element, htmlSourceList, width, height })
+
   return createSnapshotFromHTMLSourceList({ htmlSourceList, width, height })
 }
 

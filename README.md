@@ -16,21 +16,28 @@ import {
   Download,
   Prepare,
   createHTMLFragCollector,
-  getCanvasFromDOMFrag
+  createSnapshotFromHTMLSourceList,
+  createSnapshotFromElement
 } from 'dom-snapshot'
 
 const {
   dataUrlToBlobUrl,
   blobToDataUrl,
-  resetFetchCache, // NOTE: should consider this function for long running pages
+  resetFetchCache, // NOTE: should consider call this function for long running pages
   fetchTextWithCache,
   fetchBlobWithCache,
   fetchDataUrlWithCache
 } = Fetch
 
-const { convertDataUrl, inlineCSSFont } = Convert
+const { 
+  convertDataUrl, 
+  inlineCSSFont 
+} = Convert
 
-const { createDownloadUrl, createDownloadBlob } = Download
+const { 
+  createDownloadUrl, 
+  createDownloadBlob 
+} = Download
 
 const { 
   prepareHTMLString,
