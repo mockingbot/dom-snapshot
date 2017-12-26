@@ -16,4 +16,7 @@ const createDownloadBlob = (fileName, data) => {
   URL.revokeObjectURL(objectUrl)
 }
 
-export { createDownloadUrl, createDownloadBlob }
+export {
+  createDownloadUrl,
+  createDownloadBlob
+}

@@ -2,10 +2,7 @@ const prepareHTMLString = async (convertedFragList) => convertedFragList.join(''
   .replace(/<br>/g, '<br/>') // FIX: wrong tag
   .replace(/&nbsp;/g, ' ') // FIX: svg don't support these markup
 
-const prepareCSSString = async (convertedFragList) => `<style>
-  ${UA_CSS_PATCH}
-  ${convertedFragList.join('')}
-</style>`
+const prepareCSSString = async (convertedFragList) => `<style>${UA_CSS_PATCH}${convertedFragList.join('')}</style>`
   .replace(/\/\*[^*]*\*+([^/*][^*]*\*+)*\//g, '') // Remove CSS comments. CHECK: https://stackoverflow.com/questions/9329552/explain-regex-that-finds-css-comments
   .replace(/#iefix&/g, '') // FIX: svg don't support this tag
 
