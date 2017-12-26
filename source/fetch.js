@@ -1,9 +1,7 @@
 const { fetch, FileReader, URL } = window
 
-const DEFAULT_FETCH_OPTION = { credentials: 'same-origin', mode: 'no-cors' }
-
 const dataUrlToBlobUrl = async (dataUrl) => {
-  const response = await fetch(dataUrl, DEFAULT_FETCH_OPTION)
+  const response = await fetch(dataUrl)
   const blob = await response.blob()
   return URL.createObjectURL(blob)
 }
@@ -14,9 +12,11 @@ const blobToDataUrl = (blob) => new Promise((resolve) => {
   reader.readAsDataURL(blob)
 })
 
+let FETCH_OPTION = { method: 'GET', cache: 'default', mode: 'cors', credentials: 'same-origin' }
+const setFetchOption = (option = {}) => { FETCH_OPTION = { ...FETCH_OPTION, ...option } }
+
 let CACHED_TEXT_FETCH_MAP = {} // cache fetch promise to prevent multi request for the same source
 let CACHED_BLOB_FETCH_MAP = {} // cache fetch promise to prevent multi request for the same source
-
 const resetFetchCache = () => {
   CACHED_TEXT_FETCH_MAP = {}
   CACHED_BLOB_FETCH_MAP = {}
@@ -25,7 +25,7 @@ const resetFetchCache = () => {
 const fetchTextWithCache = (url) => {
   if (!CACHED_TEXT_FETCH_MAP[ url ]) {
     __DEV__ && console.log('fetchTextWithCache', url)
-    CACHED_TEXT_FETCH_MAP[ url ] = fetch(url, DEFAULT_FETCH_OPTION).then((response) => response.text())
+    CACHED_TEXT_FETCH_MAP[ url ] = fetch(url, FETCH_OPTION).then((response) => response.text())
   }
   return CACHED_TEXT_FETCH_MAP[ url ]
 }
@@ -33,7 +33,7 @@ const fetchTextWithCache = (url) => {
 const fetchBlobWithCache = (url) => {
   if (!CACHED_BLOB_FETCH_MAP[ url ]) {
     __DEV__ && console.log('fetchBlobWithCache', url)
-    CACHED_BLOB_FETCH_MAP[ url ] = fetch(url, DEFAULT_FETCH_OPTION).then((response) => response.blob())
+    CACHED_BLOB_FETCH_MAP[ url ] = fetch(url, FETCH_OPTION).then((response) => response.blob())
   }
   return CACHED_BLOB_FETCH_MAP[ url ]
 }
@@ -43,6 +43,7 @@ const fetchDataUrlWithCache = async (dataUrl) => blobToDataUrl(await fetchBlobWi
 export {
   dataUrlToBlobUrl,
   blobToDataUrl,
+  setFetchOption,
   resetFetchCache,
   fetchTextWithCache,
   fetchBlobWithCache,

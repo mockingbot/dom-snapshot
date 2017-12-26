@@ -25,6 +25,7 @@ import {
 const {
   dataUrlToBlobUrl,
   blobToDataUrl,
+  setFetchOption, // can be used to adjust fetch option
   resetFetchCache, // NOTE: should consider call this function for long running pages
   fetchTextWithCache,
   fetchBlobWithCache,
