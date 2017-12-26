@@ -41,11 +41,13 @@ const createUrlExtractor = (regexpSearchBlock, regexpExtractUrl) => (fragList, f
   let currentIndex = 0
   let searchResult
   while ((searchResult = regexpSearchBlock.exec(frag)) !== null) { // faster, search potential block
-    __DEV__ && console.log('[extractor] searchResult:', searchResult)
     const blockString = searchResult[ 0 ]
+    __DEV__ && console.log('[extractor] get blockString:', blockString)
     const extractResult = regexpExtractUrl.exec(blockString) // slower & preciser, pick url
     const urlString = extractResult && extractResult[ 1 ]
+    __DEV__ && !urlString && console.warn('[extractor] false blockString:', blockString)
     if (!urlString) continue
+    __DEV__ && console.log('[extractor] get urlString:', urlString)
     const urlIndex = searchResult.index + extractResult.index + extractResult[ 0 ].indexOf(urlString)
     const preUrlFrag = frag.slice(currentIndex, urlIndex)
     fragList.push(preUrlFrag)
@@ -60,8 +62,8 @@ const REGEXP_IMAGE_TAG = /<img [^>]*>/g
 const REGEXP_IMAGE_TAG_SRC = /src=['"]([^'"]*)['"]/
 const extractHTMLImageTagSrc = createUrlExtractor(REGEXP_IMAGE_TAG, REGEXP_IMAGE_TAG_SRC) // extract <img src="URL">
 
-const REGEXP_INLINE_STYLE = /style=["]([^"]*)["]/g
-const REGEXP_INLINE_STYLE_URL = /url\([']?([^)']*)[']?\)/
+const REGEXP_INLINE_STYLE = /style=['"].*url\(.*\).*['"]/g
+const REGEXP_INLINE_STYLE_URL = /url\(['"]?([^)'"]*)['"]?\)/
 const extractHTMLStyleInlineUrl = createUrlExtractor(REGEXP_INLINE_STYLE, REGEXP_INLINE_STYLE_URL) // extract style="background: url(URL);"
 
 // collect HTML fragment & separate url
@@ -71,7 +73,7 @@ const REGEXP_CSS_URL = /:.*url\(.*\)/g
 const extractCSSImageSrc = createUrlExtractor(REGEXP_CSS_URL, REGEXP_INLINE_STYLE_URL) // extract style="background: url(URL);"
 
 const REGEXP_CSS_FONT_SRC = /src:.*url\(.*\)/g
-const REGEXP_CSS_FONT_URL = /\/?(\.?\.\/)*\b[-\w@:%_+.~#?&/=]+.(woff2|woff|ttf)([?#][-\w%._#=]{1,256})?/g // match woff2/woff/ttf font check https://regexr.com/3if5n
+const REGEXP_CSS_FONT_URL = /(\/?(\.?\.\/)*\b[-\w@:%_+.~#?&/=]+.(woff2|woff|ttf|svg))([?#][-\w%._#=]{1,256})?/g // match woff2/woff/ttf/svg font check https://regexr.com/3ifpv
 const extractCSSFontSrc = createUrlExtractor(REGEXP_CSS_FONT_SRC, REGEXP_CSS_FONT_URL) // extract src: url(Material-Icons.woff2) format('woff2');
 
 // collect HTML fragment & separate url

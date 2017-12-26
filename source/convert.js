@@ -30,14 +30,15 @@ const convertDataUrl = (urlString, originUrl) => {
 }
 const REGEXP_URL_EXTENSION = /\.([0-9a-z]{3,5})(?:[?#]|$)/i // check http://stackoverflow.com/questions/6582171/javascript-regex-for-matching-extracting-file-extension
 const EXTENSION_MIME_MAP = {
-  ttf: 'font/ttf',
-  woff: 'font/woff',
   woff2: 'font/woff2',
+  woff: 'font/woff',
+  ttf: 'font/ttf',
+
+  svg: 'image/svg+xml',
 
   png: 'image/png',
   jpg: 'image/jpeg',
   jpeg: 'image/jpeg',
-  svg: 'image/svg+xml',
   gif: 'image/gif',
   bmp: 'image/bmp',
   ico: 'image/x-icon'
