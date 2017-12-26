@@ -54,14 +54,6 @@
         <p style="font-family: 'Material Icons';">bug_report</p>
         <p style="font-family: 'Material Icons';">lightbulb_outline</p>
         <hr />
-        <b>Img</b>
-        <hr />
-        <img src="resource/Test%20Image.png">
-        <hr />
-        <b>Img (CORS)</b>
-        <hr />
-        <img src="https://img.shields.io/npm/v/dom-snapshot.svg">
-        <hr />
         <b>Style (url())</b>
         <hr />
         <div class="flex-row">
@@ -70,6 +62,14 @@
           <div class="test-image"></div>
           <div class="test-image circle"></div>
         </div>
+        <hr />
+        <b>Img</b>
+        <hr />
+        <img src="resource/Test%20Image.png">
+        <hr />
+        <b>Img (CORS)</b>
+        <hr />
+        <img src="https://img.shields.io/npm/v/dom-snapshot.svg">
       </div>
     </div>
     <div class="flex-column box">
@@ -104,13 +104,15 @@
 
     const timeStart = Time.clock()
 
-    createSnapshotFromElement(qS('#source')).then(({ htmlString, cssString, domString, svgString, imageElement, canvasElement }) => {
+    createSnapshotFromElement({ element: qS('#source') }).then(({ htmlString, cssString, domString, svgString, imageElement, canvasElement }) => {
+      const timeStop = Time.clock()
+
       console.log('[doSnapshot]', { imageElement, canvasElement })
 
       const pngDataUrl = tryGetCanvasDataUrl(canvasElement) || ''
 
       qS('#output-status').innerHTML = [
-        `time: ${Format.time(Time.clock() - timeStart)}`,
+        `time: ${Format.time(timeStop - timeStart)}`,
         `htmlString: ${sizeOfString(htmlString)}`,
         `cssString: ${sizeOfString(cssString)}`,
         `domString: ${sizeOfString(domString)}`,

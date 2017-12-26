@@ -1,34 +1,14 @@
-import { Fetch, Convert } from './data'
+const prepareHTMLString = async (convertedFragList) => convertedFragList.join('')
+  .replace(/<br>/g, '<br/>') // FIX: wrong tag
+  .replace(/&nbsp;/g, ' ') // FIX: svg don't support these markup
 
-const prepareHTMLString = async (urlMap = {}, htmlFragList = []) => {
-  for (const [ urlString, urlInfo ] of Object.entries(urlMap)) {
-    urlInfo.dataUrl = (await Convert.convertDataUrl(urlString)) || ''
-  }
+const prepareCSSString = async (convertedFragList) => `<style>
+  ${UA_CSS_PATCH}
+  ${convertedFragList.join('')}
+</style>`
+  .replace(/\/\*[^*]*\*+([^/*][^*]*\*+)*\//g, '') // Remove CSS comments. CHECK: https://stackoverflow.com/questions/9329552/explain-regex-that-finds-css-comments
+  .replace(/#iefix&/g, '') // FIX: svg don't support this tag
 
-  for (let index = 0, indexMax = htmlFragList.length; index < indexMax; index++) {
-    const frag = htmlFragList[ index ]
-    if (typeof (frag) === 'object') htmlFragList[ index ] = frag.dataUrl
-  }
-
-  __DEV__ && console.log('[prepareHTMLString] htmlFragList:', htmlFragList.length)
-
-  return htmlFragList.join('')
-    .replace(/<br>/g, '<br/>') // FIX: wrong tag
-    .replace(/&nbsp;/g, ' ') // FIX: svg don't support these markup
-}
-
-const prepareCSSString = async (cssLinkHrefList = [], cssFragList = []) => {
-  for (const cssLinkHref of cssLinkHrefList) {
-    const cssString = await Fetch.fetchTextWithCache(cssLinkHref) // get CSS content
-    cssFragList.push(await Convert.inlineCSSFont(cssString, cssLinkHref)) // get font in css
-  }
-
-  __DEV__ && console.log('[prepareCSSString] cssFragList:', cssFragList.length)
-
-  return `<style>${UA_CSS_PATCH}${cssFragList.join(' ')}</style>`
-    .replace(/\/\*[^*]*\*+([^/*][^*]*\*+)*\//g, '') // Remove CSS comments. CHECK: https://stackoverflow.com/questions/9329552/explain-regex-that-finds-css-comments
-    .replace(/#iefix&/g, '') // FIX: svg don't support this tag
-}
 const UA_CSS_PATCH = `
 input[type="radio"] { -webkit-appearance: radio; -moz-appearance: radio; }
 input[type="checkbox"] { -webkit-appearance: checkbox; -moz-appearance: checkbox; }

@@ -14,10 +14,10 @@ import {
   Fetch,
   Convert,
   Download,
+  FragCollector,
   Prepare,
-  createHTMLFragCollector,
-  createSnapshotFromHTMLSourceList,
-  createSnapshotFromElement
+  createSnapshotFromElement,
+  createSnapshotFromHTMLSourceList
 } from 'dom-snapshot'
 
 const {
@@ -29,9 +29,10 @@ const {
   fetchDataUrlWithCache
 } = Fetch
 
-const { 
-  convertDataUrl, 
-  inlineCSSFont 
+const {
+  getAbsoluteUrl,
+  convertDataUrl,
+  convertFragListWithUrlMap
 } = Convert
 
 const { 
@@ -39,12 +40,12 @@ const {
   createDownloadBlob 
 } = Download
 
-const { 
+const {
   prepareHTMLString,
   prepareCSSString,
   prepareSVGString,
   prepareImageElement,
-  prepareCanvasElement 
+  prepareCanvasElement
 } = Prepare
 ```
 
