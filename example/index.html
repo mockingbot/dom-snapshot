@@ -2,20 +2,31 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="initial-scale=1" />
   <title>Test DOM Snapshot</title>
   <link rel="stylesheet" href="resource/font/index.css">
   <link rel="stylesheet" href="resource/reset.css">
   <style>
-    #root { overflow: auto; padding: 24px; width: 100vw; min-height: 100vh; display: flex; flex-flow: column; align-items: center; }
+    #root { overflow: auto; padding: 24px; width: 100vw; min-height: 100vh; align-items: center; }
 
-    .box { padding: 16px; }
+    .box, .flex-row, .flex-column { max-width: 100%; max-height: 100%; }
 
-    .flex-row { display: flex; }
+    .box { overflow: auto; padding: 16px; }
 
-    .flex-column { display: flex; flex-flow: column; }
+    .flex-row { display: flex; flex-flow: row wrap; }
+
+    .flex-column { display: flex; flex-flow: column wrap; }
+
+    #source, #output-canvas { overflow: hidden; width: 400px; height: 400px; border: 1px solid #ddd; }
+
+    #output-canvas {
+      image-rendering: optimizeSpeed; /* Legal fallback */
+      image-rendering: pixelated; /* CSS4 Proposed */
+    }
 
     /* test inline style */
-    #source { overflow: hidden; width: 400px; height: 400px; border: 1px solid #ddd; }
+    /* TODO: not support style url() yet */
+    .test-image { margin: 24px; width: 48px; height: 48px; background-image: url('resource/Test Image.png') }
 
     .circle { border-radius: 100%; box-shadow: 0 0 0 5px hsl(0, 0%, 20%), 0 0 0 10px hsl(0, 50%, 50%), 0 0 15px 15px hsl(0, 0%, 0%); }
   </style>
@@ -30,23 +41,35 @@
       <button id="download-png" disabled>Download PNG</button>
     </div>
     <pre id="output-status" class="box"></pre>
+    <pre id="output-log" class="box" style="color: #f66;"></pre>
   </div>
   <div class="flex-row">
     <div class="flex-column box">
       <b>Source</b>
       <div id="source">
+        <b>Font</b>
+        <hr />
         <p style="font-family: 'DrCoder';">Test Font DrCoder</p>
-        <hr />
         <p style="font-family: 'Roboto';">Test Font Roboto</p>
-        <hr />
         <p style="font-family: 'Material Icons';">bug_report</p>
         <p style="font-family: 'Material Icons';">lightbulb_outline</p>
         <hr />
-        <div class="circle" style="width: 48px; height: 48px;  background-image: url('resource/Test Image.png')"></div>
-        <hr />
-        <div style="width: 48px; height: 48px;  background-image: url('resource/Test Image.png')"></div>
+        <b>Img</b>
         <hr />
         <img src="resource/Test%20Image.png">
+        <hr />
+        <b>Img (CORS)</b>
+        <hr />
+        <img src="https://img.shields.io/npm/v/dom-snapshot.svg">
+        <hr />
+        <b>Style (url())</b>
+        <hr />
+        <div class="flex-row">
+          <div style="margin: 24px; width: 48px; height: 48px; background-image: url('resource/Test Image.png')"></div>
+          <div style="margin: 24px; width: 48px; height: 48px; background-image: url('resource/Test Image.png')" class="circle"></div>
+          <div class="test-image"></div>
+          <div class="test-image circle"></div>
+        </div>
       </div>
     </div>
     <div class="flex-column box">
@@ -69,13 +92,22 @@
   window.resetFetchCache = () => Fetch.resetFetchCache()
   window.doSnapshot = () => {
     qS('#output-canvas').height = 0
+    qS('#output-log').innerHTML = ''
+
+    const tryGetCanvasDataUrl = (canvasElement) => {
+      try { return canvasElement.toDataURL() }
+      catch (error) {
+        console.warn('[tryGetCanvasDataUrl]', error)
+        qS('#output-log').innerHTML += `[tryGetCanvasDataUrl] ${error.stack || error}\n`
+      }
+    }
 
     const timeStart = Time.clock()
 
     createSnapshotFromElement(qS('#source')).then(({ htmlString, cssString, domString, svgString, imageElement, canvasElement }) => {
       console.log('[doSnapshot]', { imageElement, canvasElement })
 
-      const pngDataUrl = canvasElement.toDataURL()
+      const pngDataUrl = tryGetCanvasDataUrl(canvasElement) || ''
 
       qS('#output-status').innerHTML = [
         `time: ${Format.time(Time.clock() - timeStart)}`,

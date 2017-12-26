@@ -1,6 +1,6 @@
 const { fetch, FileReader, URL } = window
 
-const DEFAULT_FETCH_OPTION = { credentials: 'same-origin' }
+const DEFAULT_FETCH_OPTION = { credentials: 'same-origin', mode: 'no-cors' }
 
 const dataUrlToBlobUrl = async (dataUrl) => {
   const response = await fetch(dataUrl, DEFAULT_FETCH_OPTION)
