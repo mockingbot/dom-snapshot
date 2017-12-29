@@ -9,11 +9,10 @@ const {
   prepareCSSString,
   prepareSVGString,
   prepareImageElement,
-  prepareCanvasElement,
-  prepareWithWorkerFrame
+  prepareCanvasElement
 } = Prepare
 
-const createSnapshotFromElement = async ({ element, width, height, useFrameWorker = false }) => {
+const createSnapshotFromElement = async ({ element, width, height, skipHeavyRender = false }) => {
   if (!element) throw new Error(`[createSnapshotFromElement] invalid element: ${element}`)
 
   width = parseInt(width || (element.style.width.endsWith('px') && element.style.width) || element.offsetWidth)
@@ -23,10 +22,10 @@ const createSnapshotFromElement = async ({ element, width, height, useFrameWorke
   const htmlSourceList = new window.XMLSerializer().serializeToString(element).split('\n')
   __DEV__ && console.log('[createSnapshotFromElement]', { element, htmlSourceList, width, height })
 
-  return createSnapshotFromHTMLSourceList({ htmlSourceList, width, height, useFrameWorker })
+  return createSnapshotFromHTMLSourceList({ htmlSourceList, width, height, skipHeavyRender })
 }
 
-const createSnapshotFromHTMLSourceList = async ({ htmlSourceList, width, height, useFrameWorker = false }) => {
+const createSnapshotFromHTMLSourceList = async ({ htmlSourceList, width, height, skipHeavyRender = false }) => {
   if (!Array.isArray(htmlSourceList)) throw new Error(`[createSnapshotFromHTMLSourceList] invalid htmlSourceList: ${htmlSourceList}`)
   if (!width || !height) throw new Error(`[createSnapshotFromHTMLSourceList] invalid size: width: ${width}, height: ${height}`)
 
@@ -43,8 +42,8 @@ const createSnapshotFromHTMLSourceList = async ({ htmlSourceList, width, height,
   Array.from(document.getElementsByTagName('style'))
     .map((element) => cssFragCollector.collect(element.innerHTML, ''))
 
-  let htmlString, cssString, domString, svgString, svgDataUrl, pngDataUrl, imageElement, canvasElement
-  const packResult = () => ({ htmlString, cssString, domString, svgString, svgDataUrl, pngDataUrl, imageElement, canvasElement })
+  let htmlString, cssString, domString, svgString, svgDataUrl, imageElement, canvasElement, pngDataUrl
+  const packResult = () => ({ htmlString, cssString, domString, svgString, svgDataUrl, imageElement, canvasElement, pngDataUrl })
   try {
     htmlString = await prepareHTMLString(await Convert.convertFragListWithUrlMap(htmlFragCollector.getOutput()))
     cssString = await prepareCSSString(await Convert.convertFragListWithUrlMap(cssFragCollector.getOutput()))
@@ -59,14 +58,21 @@ const createSnapshotFromHTMLSourceList = async ({ htmlSourceList, width, height,
     // const blobUrl = URL.createObjectURL(new Blob([ svgString ], { type: 'image/svg+xml' }))
     svgDataUrl = `data:image/svg+xml;charset=utf8,${encodeURIComponent(svgString)}`
 
-    if (useFrameWorker) {
-      pngDataUrl = await prepareWithWorkerFrame({ svgDataUrl, width, height })
-    } else {
-      imageElement = await prepareImageElement({ svgDataUrl, width, height })
-      canvasElement = await prepareCanvasElement({ imageElement, width, height })
+    if (!skipHeavyRender) {
+      const result = await renderPngDataUrlFromSvgDataUrl({ svgDataUrl, width, height })
+      imageElement = result.imageElement
+      canvasElement = result.canvasElement
+      pngDataUrl = result.pngDataUrl
     }
   } catch (error) { __DEV__ && console.warn('[createSnapshotFromHTMLSourceList] error:', error, packResult()) }
   return packResult()
+}
+
+const renderPngDataUrlFromSvgDataUrl = async ({ svgDataUrl, width, height }) => {
+  const imageElement = await prepareImageElement({ svgDataUrl, width, height })
+  const canvasElement = await prepareCanvasElement({ imageElement, width, height })
+  const pngDataUrl = canvasElement.toDataURL()
+  return { imageElement, canvasElement, pngDataUrl }
 }
 
 export {
@@ -76,5 +82,6 @@ export {
   FragCollector,
   Prepare,
   createSnapshotFromElement,
-  createSnapshotFromHTMLSourceList
+  createSnapshotFromHTMLSourceList,
+  renderPngDataUrlFromSvgDataUrl
 }

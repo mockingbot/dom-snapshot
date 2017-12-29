@@ -17,14 +17,11 @@
 
     .flex-column { display: flex; flex-flow: column wrap; }
 
-    #input-style, #input-html, #source-html, #output-canvas, #output-img { overflow: auto; width: 400px; height: 400px; border: 1px solid #ddd; }
+    #input-style, #input-html, #source-html, #output-canvas, #output-img { overflow: auto; width: 400px; height: 400px; border: 0; box-shadow: 0 0 0 1px #ddd; }
 
     #input-style, #input-html { font-size: 10px; }
 
-    #output-canvas, #output-img {
-      image-rendering: optimizeSpeed; /* Legal fallback */
-      image-rendering: pixelated; /* CSS4 Proposed */
-    }
+    #output-canvas, #output-img { image-rendering: optimizeSpeed; /* Legal fallback */ image-rendering: pixelated; /* CSS4 Proposed */ }
   </style>
   <style id="source-style"></style>
 </head>
@@ -43,8 +40,8 @@
   <div class="flex-row">
     <div class="flex-column box">
       <button onclick="window.applyInput()">applyInput</button>
-      <button onclick="window.doSnapshot(false)">doSnapshot</button>
-      <button onclick="window.doSnapshot(true)">doSnapshotWithFrameWorker</button>
+      <button onclick="window.snapshot('cors')">snapshot(core)</button>
+      <button onclick="window.snapshot('no-cors')">snapshot(no-cors)</button>
       <button onclick="window.resetFetchCache()">resetFetchCache</button>
       <button id="download-svg" disabled>Download SVG</button>
       <button id="download-png" disabled>Download PNG</button>
@@ -59,11 +56,11 @@
     </div>
     <div class="flex-column box">
       <label for="output-canvas">Output canvas</label>
-      <canvas id="output-canvas" width="400" height="0">CANVAS</canvas>
+      <canvas id="output-canvas" width="400" height="400">CANVAS</canvas>
     </div>
     <div class="flex-column box">
       <label for="output-img">Output img</label>
-      <img id="output-img" src="" />
+      <img id="output-img" src="//:0" />
     </div>
   </div>
 </div>
@@ -115,6 +112,8 @@
 <b>Img (CORS)</b>
 <hr />
 <img src="https://mockingbot.github.io/dom-snapshot/example/resource/Test%20Image.png">
+<img src="https://unpkg.com/material-design-icons/action/1x_web/ic_account_box_black_48dp.png">
+<img src="https://unpkg.com/material-design-icons/action/svg/production/ic_3d_rotation_48px.svg">
 </pre>
 <script src="https://unpkg.com/dr-js/library/Dr.js"></script>
 <script src="index.js"></script>
@@ -126,13 +125,6 @@
 
   const qS = (selector) => document.querySelector(selector)
   const sizeOfString = (string) => `${Format.binary(new window.Blob([ string ]).size)}B`
-  const tryGetCanvasDataUrl = (canvasElement) => {
-    try { return canvasElement.toDataURL() }
-    catch (error) {
-      console.warn('[tryGetCanvasDataUrl]', error)
-      qS('#output-log').innerHTML += `[tryGetCanvasDataUrl] ${error.stack || error}\n`
-    }
-  }
 
   qS('#input-style').value = qS('#init-input-style').innerHTML
   qS('#input-html').value = qS('#init-input-html').innerHTML
@@ -142,16 +134,24 @@
     qS('#source-html').innerHTML = qS('#input-html').value
   }
   window.resetFetchCache = () => Fetch.resetFetchCache()
-  window.doSnapshot = (useFrameWorker) => {
+
+  let prevFetchMode
+  window.snapshot = (fetchMode) => {
+    if (prevFetchMode !== fetchMode) {
+      prevFetchMode = fetchMode
+      Fetch.resetFetchCache()
+      Fetch.setFetchOption({ mode: fetchMode, method: 'GET', cache: 'default', credentials: 'same-origin' })
+    }
+
     qS('#output-log').innerHTML = ''
-    qS('#output-canvas').height = 0
+    qS('#output-canvas').width += 0
     qS('#output-img').src = ''
 
     const timeStart = Time.clock()
-    createSnapshotFromElement({ element: qS('#source-html'), useFrameWorker }).then(({ htmlString, cssString, domString, svgString, svgDataUrl, pngDataUrl, imageElement, canvasElement }) => {
+    createSnapshotFromElement({ element: qS('#source-html') }).then(({
+      htmlString, cssString, domString, svgString, svgDataUrl, imageElement, canvasElement, pngDataUrl
+    }) => {
       const timeStop = Time.clock()
-
-      if (!useFrameWorker) pngDataUrl = tryGetCanvasDataUrl(canvasElement) || ''
 
       qS('#output-status').innerHTML = [
         `time: ${Format.time(timeStop - timeStart)}`,
@@ -163,18 +163,15 @@
         `pngDataUrl: ${sizeOfString(pngDataUrl)}`
       ].join('\n')
 
-      if (canvasElement) {
-        qS('#output-canvas').height = 400
-        qS('#output-canvas').getContext('2d').drawImage(canvasElement, 0, 0)
-      }
+      canvasElement && qS('#output-canvas').getContext('2d').drawImage(canvasElement, 0, 0)
 
       qS('#output-img').src = pngDataUrl
 
-      qS('#download-svg').disabled = false
-      qS('#download-svg').onclick = () => Download.createDownloadBlob('output.svg', [ svgString ])
+      qS('#download-svg').disabled = Boolean(svgString)
+      qS('#download-svg').onclick = () => svgString && Download.createDownloadBlob('output.svg', [ svgString ])
 
-      qS('#download-png').disabled = false
-      qS('#download-png').onclick = () => Download.createDownloadUrl('output.png', pngDataUrl)
+      qS('#download-png').disabled = Boolean(pngDataUrl)
+      qS('#download-png').onclick = () => pngDataUrl && Download.createDownloadUrl('output.png', pngDataUrl)
     })
   }
 </script>

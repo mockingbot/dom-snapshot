@@ -1,11 +1,11 @@
 # DOM Snapshot
 
-[![i:npm:dom-snapshot]][l:npm:dom-snapshot]
-[![i:code-style:standard-js]][l:code-style:standard-js]
+[![i:npm]][l:npm]
+[![i:code-style]][l:code-style]
 
 Get `<canvas>` from DOM string through SVG `<foreignObject>`.
 
-[Online DEMO][l:demo:dom-snapshot]
+[Online DEMO][l:demo]
 
 ## Usage
 
@@ -19,7 +19,8 @@ import {
   FragCollector,
   Prepare,
   createSnapshotFromElement,
-  createSnapshotFromHTMLSourceList
+  createSnapshotFromHTMLSourceList,
+  renderPngDataUrlFromSvgDataUrl
 } from 'dom-snapshot'
 
 const {
@@ -48,13 +49,12 @@ const {
   prepareCSSString,
   prepareSVGString,
   prepareImageElement,
-  prepareCanvasElement,
-  prepareWithWorkerFrame
+  prepareCanvasElement
 } = Prepare
 ```
 
-[l:demo:dom-snapshot]: https://mockingbot.github.io/dom-snapshot
-[i:npm:dom-snapshot]: https://img.shields.io/npm/v/dom-snapshot.svg
-[l:npm:dom-snapshot]: https://www.npmjs.com/package/dom-snapshot
-[i:code-style:standard-js]: https://img.shields.io/badge/code_style-standard-brightgreen.svg
-[l:code-style:standard-js]: https://standardjs.com
+[l:demo]: https://mockingbot.github.io/dom-snapshot
+[i:npm]: https://img.shields.io/npm/v/dom-snapshot.svg
+[l:npm]: https://www.npmjs.com/package/dom-snapshot
+[i:code-style]: https://img.shields.io/badge/code_style-standard-brightgreen.svg
+[l:code-style]: https://standardjs.com
