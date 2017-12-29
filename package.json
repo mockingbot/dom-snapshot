@@ -1,6 +1,6 @@
 {
   "name": "dom-snapshot",
-  "version": "0.1.4",
+  "version": "0.1.5-dev.0",
   "author": "mockingbot",
   "license": "MIT",
   "description": "Get `<canvas>` from DOM string through SVG `<foreignObject>`.",

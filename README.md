@@ -48,7 +48,8 @@ const {
   prepareCSSString,
   prepareSVGString,
   prepareImageElement,
-  prepareCanvasElement
+  prepareCanvasElement,
+  prepareWithWorkerFrame
 } = Prepare
 ```
 
