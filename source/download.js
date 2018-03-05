@@ -10,8 +10,7 @@ const createDownloadUrl = (fileName, dataUrl) => {
 }
 
 const createDownloadBlob = (fileName, data) => {
-  const blob = new Blob(data)
-  const objectUrl = URL.createObjectURL(blob)
+  const objectUrl = URL.createObjectURL(new Blob(data))
   createDownloadUrl(fileName, objectUrl)
   URL.revokeObjectURL(objectUrl)
 }

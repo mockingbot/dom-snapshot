@@ -1,16 +1,13 @@
-import * as Fetch from './fetch'
-import * as Convert from './convert'
-import * as Download from './download'
-import * as FragCollector from './fragCollector'
-import * as Prepare from './prepare'
-
-const {
+import { fetchTextWithCache } from './fetch'
+import { convertFragListWithUrlMap } from './convert'
+import { createHTMLFragCollector, createCSSFragCollector } from './fragCollector'
+import {
   prepareHTMLString,
   prepareCSSString,
   prepareSVGString,
   prepareImageElement,
   prepareCanvasElement
-} = Prepare
+} from './prepare'
 
 const createSnapshotFromElement = async ({ element, width, height, skipHeavyRender = false }) => {
   if (!element) throw new Error(`[createSnapshotFromElement] invalid element: ${element}`)
@@ -29,15 +26,15 @@ const createSnapshotFromHTMLSourceList = async ({ htmlSourceList, width, height,
   if (!Array.isArray(htmlSourceList)) throw new Error(`[createSnapshotFromHTMLSourceList] invalid htmlSourceList: ${htmlSourceList}`)
   if (!width || !height) throw new Error(`[createSnapshotFromHTMLSourceList] invalid size: width: ${width}, height: ${height}`)
 
-  const htmlFragCollector = FragCollector.createHTMLFragCollector()
+  const htmlFragCollector = createHTMLFragCollector()
   htmlSourceList.forEach((fragString) => htmlFragCollector.collect(fragString, ''))
 
-  const cssFragCollector = FragCollector.createCSSFragCollector()
+  const cssFragCollector = createCSSFragCollector()
   const cssUrlList = Array.from(document.getElementsByTagName('link'))
     .map((element) => (element.rel === 'stylesheet' && element.href))
     .filter((href) => href)
   for (const cssUrl of cssUrlList) {
-    cssFragCollector.collect(await Fetch.fetchTextWithCache(cssUrl), cssUrl) // with originUrl
+    cssFragCollector.collect(await fetchTextWithCache(cssUrl), cssUrl) // with originUrl
   }
   Array.from(document.getElementsByTagName('style'))
     .map((element) => cssFragCollector.collect(element.innerHTML, ''))
@@ -45,8 +42,8 @@ const createSnapshotFromHTMLSourceList = async ({ htmlSourceList, width, height,
   let htmlString, cssString, domString, svgString, svgDataUrl, imageElement, canvasElement, pngDataUrl
   const packResult = () => ({ htmlString, cssString, domString, svgString, svgDataUrl, imageElement, canvasElement, pngDataUrl })
   try {
-    htmlString = await prepareHTMLString(await Convert.convertFragListWithUrlMap(htmlFragCollector.getOutput()))
-    cssString = await prepareCSSString(await Convert.convertFragListWithUrlMap(cssFragCollector.getOutput()))
+    htmlString = await prepareHTMLString(await convertFragListWithUrlMap(htmlFragCollector.getOutput()))
+    cssString = await prepareCSSString(await convertFragListWithUrlMap(cssFragCollector.getOutput()))
     domString = `${cssString}\n${htmlString}`
     svgString = await prepareSVGString({ domString, width, height })
 
@@ -76,11 +73,6 @@ const renderPngDataUrlFromSvgDataUrl = async ({ svgDataUrl, width, height }) => 
 }
 
 export {
-  Fetch,
-  Convert,
-  Download,
-  FragCollector,
-  Prepare,
   createSnapshotFromElement,
   createSnapshotFromHTMLSourceList,
   renderPngDataUrlFromSvgDataUrl

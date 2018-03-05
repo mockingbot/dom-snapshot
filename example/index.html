@@ -115,12 +115,16 @@
 <img src="https://unpkg.com/material-design-icons/action/1x_web/ic_account_box_black_48dp.png">
 <img src="https://unpkg.com/material-design-icons/action/svg/production/ic_3d_rotation_48px.svg">
 </pre>
-<script src="https://unpkg.com/dr-js/library/Dr.js"></script>
+<script src="https://unpkg.com/dr-js@0.12.0/library/Dr.browser.js"></script>
 <script src="index.js"></script>
 <script>
   const {
     Dr: { Common: { Format, Time } },
-    DOM_SNAPSHOT: { Fetch, Download, createSnapshotFromElement }
+    DomSnapshot: {
+      Fetch: { resetFetchCache, setFetchOption },
+      Download: { createDownloadBlob, createDownloadUrl },
+      createSnapshotFromElement
+    }
   } = window
 
   const qS = (selector) => document.querySelector(selector)
@@ -133,14 +137,14 @@
     qS('#source-style').innerHTML = qS('#input-style').value
     qS('#source-html').innerHTML = qS('#input-html').value
   }
-  window.resetFetchCache = () => Fetch.resetFetchCache()
+  window.resetFetchCache = resetFetchCache
 
   let prevFetchMode
   window.snapshot = (fetchMode) => {
     if (prevFetchMode !== fetchMode) {
       prevFetchMode = fetchMode
-      Fetch.resetFetchCache()
-      Fetch.setFetchOption({ mode: fetchMode, method: 'GET', cache: 'default', credentials: 'same-origin' })
+      resetFetchCache()
+      setFetchOption({ mode: fetchMode, method: 'GET', cache: 'default', credentials: 'same-origin' })
     }
 
     qS('#output-log').innerHTML = ''
@@ -168,10 +172,10 @@
       qS('#output-img').src = pngDataUrl
 
       qS('#download-svg').disabled = Boolean(svgString)
-      qS('#download-svg').onclick = () => svgString && Download.createDownloadBlob('output.svg', [ svgString ])
+      qS('#download-svg').onclick = () => svgString && createDownloadBlob('output.svg', [ svgString ])
 
       qS('#download-png').disabled = Boolean(pngDataUrl)
-      qS('#download-png').onclick = () => pngDataUrl && Download.createDownloadUrl('output.png', pngDataUrl)
+      qS('#download-png').onclick = () => pngDataUrl && createDownloadUrl('output.png', pngDataUrl)
     })
   }
 </script>
