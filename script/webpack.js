@@ -1,6 +1,6 @@
 import { resolve as resolvePath } from 'path'
 import { writeFileSync, unlinkSync } from 'fs'
-import { DefinePlugin, HashedModuleIdsPlugin } from 'webpack'
+import { DefinePlugin } from 'webpack'
 
 import { argvFlag, runMain } from 'dev-dep-tool/library/__utils__'
 import { compileWithWebpack } from 'dev-dep-tool/library/webpack'
@@ -45,18 +45,15 @@ runMain(async (logger) => {
     entry: { index: 'source/index.example' },
     resolve: { alias: { source: fromRoot('source') } },
     module: { rules: [ { test: /\.js$/, use: [ { loader: 'babel-loader', options: babelOption } ] } ] },
-    plugins: [
-      new DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify(mode), '__DEV__': !isProduction }),
-      new HashedModuleIdsPlugin()
-    ]
+    plugins: [ new DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify(mode), '__DEV__': !isProduction }) ]
   }
 
-  logger.log(`generate index.example.js: ${Boolean(isWatch)}`)
+  logger.log(`generate index.example.js`)
   writeFileSync(fromRoot('source/index.example.js'), INDEX_FILE_DATA)
 
   logger.log(`compile with webpack mode: ${mode}, isWatch: ${Boolean(isWatch)}`)
   await compileWithWebpack({ config, isWatch, profileOutput, logger })
 
-  logger.log(`delete index.example.js: ${Boolean(isWatch)}`)
+  logger.log(`delete index.example.js`)
   unlinkSync(fromRoot('source/index.example.js'), INDEX_FILE_DATA)
 }, getLogger(`webpack`))

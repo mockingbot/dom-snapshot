@@ -10,11 +10,11 @@ import {
 } from './prepare'
 
 const createSnapshotFromElement = async ({ element, width, height, skipHeavyRender = false }) => {
-  if (!element) throw new Error(`[createSnapshotFromElement] invalid element: ${element}`)
+  if (!element) throw new Error(`invalid element: ${element}`)
 
   width = parseInt(width || (element.style.width.endsWith('px') && element.style.width) || element.offsetWidth)
   height = parseInt(height || (element.style.height.endsWith('px') && element.style.height) || element.offsetHeight)
-  if (!width || !height) throw new Error(`[createSnapshotFromElement] can not get output size: width: ${width}, height: ${height}`)
+  if (!width || !height) throw new Error(`can not get output size: width: ${width}, height: ${height}`)
 
   const htmlSourceList = new window.XMLSerializer().serializeToString(element).split('\n')
   __DEV__ && console.log('[createSnapshotFromElement]', { element, htmlSourceList, width, height })
@@ -23,8 +23,8 @@ const createSnapshotFromElement = async ({ element, width, height, skipHeavyRend
 }
 
 const createSnapshotFromHTMLSourceList = async ({ htmlSourceList, width, height, skipHeavyRender = false }) => {
-  if (!Array.isArray(htmlSourceList)) throw new Error(`[createSnapshotFromHTMLSourceList] invalid htmlSourceList: ${htmlSourceList}`)
-  if (!width || !height) throw new Error(`[createSnapshotFromHTMLSourceList] invalid size: width: ${width}, height: ${height}`)
+  if (!Array.isArray(htmlSourceList)) throw new Error(`invalid htmlSourceList: ${htmlSourceList}`)
+  if (!width || !height) throw new Error(`invalid size: width: ${width}, height: ${height}`)
 
   const htmlFragCollector = createHTMLFragCollector()
   htmlSourceList.forEach((fragString) => htmlFragCollector.collect(fragString, ''))
