@@ -1,10 +1,16 @@
+/* eslint no-control-regex: "off" */
+
+const REGEXP_XML_INVALID_CHAR = /[^\x09\x0A\x0D\x20-\xFF\x85\xA0-\uD7FF\uE000-\uFDCF\uFDE0-\uFFFD]/gm // remove XML invalid Char value
+
 const prepareHTMLString = async (convertedFragList) => convertedFragList.join('')
   .replace(/<br>/g, '<br/>') // FIX: wrong tag
   .replace(/&nbsp;/g, ' ') // FIX: svg don't support these markup
+  .replace(REGEXP_XML_INVALID_CHAR, '')
 
 const prepareCSSString = async (convertedFragList) => `<style>${UA_CSS_PATCH}${convertedFragList.join('')}</style>`
   .replace(/\/\*[^*]*\*+([^/*][^*]*\*+)*\//g, '') // Remove CSS comments. CHECK: https://stackoverflow.com/questions/9329552/explain-regex-that-finds-css-comments
   .replace(/#iefix&/g, '') // FIX: svg don't support this tag
+  .replace(REGEXP_XML_INVALID_CHAR, '')
 const UA_CSS_PATCH = `
 input[type="radio"] { -webkit-appearance: radio; -moz-appearance: radio; }
 input[type="checkbox"] { -webkit-appearance: checkbox; -moz-appearance: checkbox; }

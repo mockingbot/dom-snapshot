@@ -26,9 +26,11 @@ runMain(async (logger) => {
   logger.log(`generate exportInfo`)
   const exportInfoMap = generateExportInfo({ sourceRouteMap })
 
-  logger.log(`output: EXPORT_INFO.md`)
-  writeFileSync(fromRoot('EXPORT_INFO.md'), [
-    '# Export Info',
+  logger.log(`output: SPEC.md`)
+  writeFileSync(fromRoot('SPEC.md'), [
+    '# Specification',
+    '',
+    '* [Export Path](#export-path)',
     '',
     '#### Export Path',
     ...renderMarkdownExportPath({ exportInfoMap, rootPath: PATH_ROOT })

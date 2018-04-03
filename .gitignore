@@ -8,6 +8,8 @@ node_modules
 # WebStorm configuration
 .idea
 
+# distribute file
 **/*-gitignore/**
+**/*-gitignore*
 /*.tgz
 /example/index.js
