@@ -7,8 +7,6 @@
   <link rel="stylesheet" href="resource/font/index.css">
   <link rel="stylesheet" href="resource/reset.css">
   <style>
-    #root { overflow: auto; width: 100vw; min-height: 100vh; align-items: center; }
-
     .box, .flex-row, .flex-column { max-width: 100%; max-height: 100%; }
 
     .box { overflow: auto; padding: 16px; }
@@ -21,12 +19,12 @@
 
     #input-style, #input-html { font-size: 10px; }
 
-    #output-canvas, #output-img { image-rendering: optimizeSpeed; /* Legal fallback */ image-rendering: pixelated; /* CSS4 Proposed */ }
+    #output-canvas, #output-img { image-rendering: pixelated; }
   </style>
   <style id="source-style"></style>
 </head>
 <body>
-<div id="root" class="flex-column">
+<div class="flex-column" style="overflow: auto; width: 100vw; min-height: 100vh; align-items: center;">
   <div class="flex-row">
     <div class="flex-column box">
       <label for="input-html">Input HTML</label>
@@ -40,14 +38,13 @@
   <div class="flex-row">
     <div class="flex-column box">
       <button onclick="window.applyInput()">applyInput</button>
-      <button onclick="window.snapshot('cors')">snapshot(core)</button>
+      <button onclick="window.snapshot('cors')">snapshot(cors)</button>
       <button onclick="window.snapshot('no-cors')">snapshot(no-cors)</button>
       <button onclick="window.resetFetchCache()">resetFetchCache</button>
       <button id="download-svg" disabled>Download SVG</button>
       <button id="download-png" disabled>Download PNG</button>
     </div>
     <pre id="output-status" class="box"></pre>
-    <pre id="output-log" class="box" style="color: #f66;"></pre>
   </div>
   <div class="flex-row">
     <div class="flex-column box">
@@ -115,17 +112,13 @@
 <img src="https://unpkg.com/material-design-icons/action/1x_web/ic_account_box_black_48dp.png">
 <img src="https://unpkg.com/material-design-icons/action/svg/production/ic_3d_rotation_48px.svg">
 </pre>
-<script src="https://unpkg.com/dr-js@0.13.2/library/Dr.browser.js"></script>
 <script src="index.js"></script>
 <script>
   const {
-    Dr: { Common: { Format, Time } },
-    DomSnapshot: {
-      Fetch: { resetFetchCache, setFetchOption },
-      Download: { createDownloadBlob, createDownloadUrl },
-      createSnapshotFromElement
-    }
-  } = window
+    Fetch: { resetFetchCache, setFetchOption },
+    createSnapshotFromElement,
+    Time, Format, Resource
+  } = window.DomSnapshot
 
   const qS = (selector) => document.querySelector(selector)
   const sizeOfString = (string) => `${Format.binary(new window.Blob([ string ]).size)}B`
@@ -147,7 +140,7 @@
       setFetchOption({ mode: fetchMode, method: 'GET', cache: 'default', credentials: 'same-origin' })
     }
 
-    qS('#output-log').innerHTML = ''
+    qS('#output-status').innerHTML = 'creating snapshot...'
     qS('#output-canvas').width += 0
     qS('#output-img').src = ''
 
@@ -171,11 +164,11 @@
 
       qS('#output-img').src = pngDataUrl
 
-      qS('#download-svg').disabled = Boolean(svgString)
-      qS('#download-svg').onclick = () => svgString && createDownloadBlob('output.svg', [ svgString ])
+      qS('#download-svg').disabled = !svgString
+      qS('#download-svg').onclick = () => svgString && Resource.createDownloadWithBlob('output.svg', new window.Blob([ svgString ]))
 
-      qS('#download-png').disabled = Boolean(pngDataUrl)
-      qS('#download-png').onclick = () => pngDataUrl && createDownloadUrl('output.png', pngDataUrl)
+      qS('#download-png').disabled = !pngDataUrl
+      qS('#download-png').onclick = () => pngDataUrl && Resource.createDownload('output.png', pngDataUrl)
     })
   }
 </script>

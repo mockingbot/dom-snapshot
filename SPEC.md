@@ -5,8 +5,6 @@
 #### Export Path
 + 📄 [source/convert.js](source/convert.js)
   - `convertDataUrl`, `convertFragListWithUrlMap`, `getAbsoluteUrl`
-+ 📄 [source/download.js](source/download.js)
-  - `createDownloadBlob`, `createDownloadUrl`
 + 📄 [source/fetch.js](source/fetch.js)
   - `blobToDataUrl`, `dataUrlToBlobUrl`, `fetchBlobWithCache`, `fetchDataUrlWithCache`, `fetchTextWithCache`, `resetFetchCache`, `setFetchOption`
 + 📄 [source/fragCollector.js](source/fragCollector.js)

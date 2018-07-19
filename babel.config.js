@@ -4,13 +4,15 @@ const isRawModule = BABEL_ENV.includes('module')
 
 module.exports = {
   presets: [
-    [ '@babel/env', { targets: isRawModule ? { node: 8 } : '> 1%, last 2 versions', modules: isRawModule ? false : 'commonjs' } ]
+    [ '@babel/env', {
+      targets: isRawModule ? { node: '8.8' } : { browsers: 'last 2 versions, ie >= 7' },
+      modules: isRawModule ? false : 'commonjs'
+    } ]
   ],
   plugins: [
-    [ '@babel/proposal-class-properties' ],
-    [ '@babel/proposal-object-rest-spread', { useBuiltIns: true } ],
+    !isRawModule && [ '@babel/plugin-proposal-object-rest-spread', { loose: true, useBuiltIns: true } ],
     [ 'module-resolver', { root: [ './' ], alias: isRawModule ? undefined : { 'dr-js/module/(.+)': 'dr-js/library/' } } ],
     [ 'minify-replace', { replacements: [ { identifierName: '__DEV__', replacement: { type: 'booleanLiteral', value: isDev } } ] } ]
-  ],
+  ].filter(Boolean),
   comments: false
 }

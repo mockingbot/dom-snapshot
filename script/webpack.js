@@ -9,10 +9,14 @@ import { getLogger } from 'dev-dep-tool/library/logger'
 const PATH_ROOT = resolvePath(__dirname, '..')
 const fromRoot = (...args) => resolvePath(PATH_ROOT, ...args)
 
+const INDEX_FILE = 'source/index.example.js'
 const INDEX_FILE_DATA = `
+import * as Time from 'dr-js/module/common/time'
+import * as Format from 'dr-js/module/common/format'
+import * as Resource from 'dr-js/module/browser/resource'
+
 import * as Fetch from './fetch'
 import * as Convert from './convert'
-import * as Download from './download'
 import * as FragCollector from './fragCollector'
 import * as Prepare from './prepare'
 
@@ -22,7 +26,10 @@ export {
   renderPngDataUrlFromSvgDataUrl
 } from './snapshot'
 
-export { Fetch, Convert, Download, FragCollector, Prepare }
+export {
+  Fetch, Convert, FragCollector, Prepare,
+  Format, Time, Resource
+}
 `
 
 runMain(async (logger) => {
@@ -32,28 +39,29 @@ runMain(async (logger) => {
   const isProduction = mode === 'production'
 
   const babelOption = {
+    configFile: false,
     babelrc: false,
     cacheDirectory: isProduction,
-    presets: [ [ '@babel/env', { targets: { node: 8 }, modules: false } ] ],
-    plugins: [ [ '@babel/proposal-class-properties' ], [ '@babel/proposal-object-rest-spread', { useBuiltIns: true } ] ]
+    presets: [ [ '@babel/env', { targets: { node: '8.8' }, modules: false } ] ],
+    plugins: [ isProduction && [ '@babel/plugin-proposal-object-rest-spread', { loose: true, useBuiltIns: true } ] ].filter(Boolean)
   }
 
   const config = {
     mode,
     bail: isProduction,
     output: { path: fromRoot('example'), filename: '[name].js', library: 'DomSnapshot', libraryTarget: 'umd' },
-    entry: { index: 'source/index.example' },
+    entry: { index: INDEX_FILE },
     resolve: { alias: { source: fromRoot('source') } },
     module: { rules: [ { test: /\.js$/, use: [ { loader: 'babel-loader', options: babelOption } ] } ] },
     plugins: [ new DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify(mode), '__DEV__': !isProduction }) ]
   }
 
-  logger.log(`generate index.example.js`)
-  writeFileSync(fromRoot('source/index.example.js'), INDEX_FILE_DATA)
+  logger.log(`generate ${INDEX_FILE}`)
+  writeFileSync(fromRoot(INDEX_FILE), INDEX_FILE_DATA)
 
   logger.log(`compile with webpack mode: ${mode}, isWatch: ${Boolean(isWatch)}`)
   await compileWithWebpack({ config, isWatch, profileOutput, logger })
 
-  logger.log(`delete index.example.js`)
-  unlinkSync(fromRoot('source/index.example.js'), INDEX_FILE_DATA)
+  logger.log(`delete ${INDEX_FILE}`)
+  unlinkSync(fromRoot(INDEX_FILE), INDEX_FILE_DATA)
 }, getLogger(`webpack`))

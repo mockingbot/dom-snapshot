@@ -1,7 +1,7 @@
 import { resolve } from 'path'
 import { writeFileSync } from 'fs'
 
-import { getDirectoryContent, walkDirectoryContent } from 'dr-js/library/node/file/Directory'
+import { getDirectoryInfoTree, walkDirectoryInfoTree } from 'dr-js/library/node/file/Directory'
 
 import { runMain } from 'dev-dep-tool/library/__utils__'
 import { getLogger } from 'dev-dep-tool/library/logger'
@@ -14,8 +14,8 @@ const fromRoot = (...args) => resolve(PATH_ROOT, ...args)
 
 const collectSourceRouteMap = async ({ logger }) => {
   const { parseExport, getSourceRouteMap } = createExportParser({ logger })
-  const parseWalkExport = (path, name) => parseExport(resolve(path, name))
-  await walkDirectoryContent(await getDirectoryContent(fromRoot('source')), parseWalkExport)
+  const parseWalkExport = ({ path }) => parseExport(path)
+  await walkDirectoryInfoTree(await getDirectoryInfoTree(fromRoot('source')), parseWalkExport)
   return getSourceRouteMap()
 }
 
