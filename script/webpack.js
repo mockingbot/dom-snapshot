@@ -2,6 +2,8 @@ import { resolve as resolvePath } from 'path'
 import { writeFileSync, unlinkSync } from 'fs'
 import { DefinePlugin } from 'webpack'
 
+import { addExitListenerSync } from 'dr-js/module/node/system/ExitListener'
+
 import { argvFlag, runMain } from 'dev-dep-tool/library/__utils__'
 import { compileWithWebpack } from 'dev-dep-tool/library/webpack'
 import { getLogger } from 'dev-dep-tool/library/logger'
@@ -62,6 +64,8 @@ runMain(async (logger) => {
   logger.log(`compile with webpack mode: ${mode}, isWatch: ${Boolean(isWatch)}`)
   await compileWithWebpack({ config, isWatch, profileOutput, logger })
 
-  logger.log(`delete ${INDEX_FILE}`)
-  unlinkSync(fromRoot(INDEX_FILE), INDEX_FILE_DATA)
+  addExitListenerSync(() => {
+    logger.log(`delete ${INDEX_FILE}`)
+    unlinkSync(fromRoot(INDEX_FILE), INDEX_FILE_DATA)
+  })
 }, getLogger(`webpack`))

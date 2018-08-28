@@ -22,7 +22,7 @@ const convertDataUrl = (urlString, originUrl) => {
 
   const regexResult = REGEXP_URL_EXTENSION.exec(urlString)
   const urlMIME = regexResult && EXTENSION_MIME_MAP[ regexResult[ 1 ].toLowerCase() ]
-  __DEV__ && console.log('[convertDataUrl] get urlMIME:', { urlString, urlMIME })
+  __DEV__ && console.log(' - [convertDataUrl] get urlMIME:', { urlString, urlMIME })
 
   return urlMIME
     ? fetchDataUrlWithCache(urlString)
@@ -33,6 +33,7 @@ const EXTENSION_MIME_MAP = {
   woff2: 'font/woff2',
   woff: 'font/woff',
   ttf: 'font/ttf',
+  otf: 'font/otf',
 
   svg: 'image/svg+xml',
 
@@ -46,8 +47,10 @@ const EXTENSION_MIME_MAP = {
 
 const convertFragListWithUrlMap = async ({ urlMap = {}, fragList = [] }) => {
   for (const urlInfo of Object.values(urlMap)) {
-    const { urlString, originUrl } = urlInfo
-    urlInfo.dataUrl = (await convertDataUrl(urlString, originUrl)) || ''
+    const { urlString, originUrl, isIgnore } = urlInfo
+    urlInfo.dataUrl = isIgnore
+      ? urlString
+      : (await convertDataUrl(urlString, originUrl)) || ''
   }
 
   for (let index = 0, indexMax = fragList.length; index < indexMax; index++) {

@@ -5,6 +5,7 @@
   <meta name="viewport" content="initial-scale=1" />
   <title>Test DOM Snapshot</title>
   <link rel="stylesheet" href="resource/font/index.css">
+  <link rel="stylesheet" href="resource/font/test-redundant-fonts.css">
   <link rel="stylesheet" href="resource/reset.css">
   <style>
     .box, .flex-row, .flex-column { max-width: 100%; max-height: 100%; }
@@ -81,12 +82,26 @@
   0 0 0 10px hsl(0, 50%, 50%),
   0 0 15px 15px hsl(0, 0%, 0%);
 }
+
+/* test redundant fonts */
+@font-face {
+  font-style: normal;
+  font-family: 'SFUIText';
+  font-weight: 400;
+  src: local('SFUIText-Regular'), local('.SFUIText-Regular'), local('SFProText-Regular'), local('SFProText'), url('sf-ui/Text-Regular.woff2') format('woff2'), url('sf-ui/Text-Regular.woff') format('woff');
+}
+@font-face {
+  font-style: normal;
+  font-family: 'SFUIText';
+  font-weight: 700;
+  src: local('SFUIText-Bold'), local('.SFUIText-Bold'), local('SFProText-Bold'), url('sf-ui/Text-Bold.woff2') format('woff2'), url('sf-ui/Text-Bold.woff') format('woff');
+}
 </pre>
 <pre id="init-input-html" style="display: none;">
 <b>Font</b>
 <hr />
-<p style="font-family: 'DrCoder';">Test Font DrCoder</p>
-<p style="font-family: 'Roboto';">Test Font Roboto</p>
+<p style="font: 22px DrCoder, Roboto, Arial">Test Font DrCoder</p>
+<p style="font-family: 'Roboto'">Test Font Roboto</p>
 <p style="font-family: 'Material Icons'; font-size: 24px;">
   <span style="color: #d62;">language</span>
   <span style="color: #2d6;">bug_report</span>

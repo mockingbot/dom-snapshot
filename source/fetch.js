@@ -12,6 +12,7 @@ const blobToDataUrl = (blob) => new Promise((resolve) => {
   reader.readAsDataURL(blob)
 })
 
+// TODO: use create function to prevent global config data
 let FETCH_OPTION = { method: 'GET', cache: 'default', mode: 'cors', credentials: 'same-origin' }
 const setFetchOption = (option = {}) => { FETCH_OPTION = { ...FETCH_OPTION, ...option } }
 

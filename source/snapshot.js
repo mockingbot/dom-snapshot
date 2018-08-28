@@ -39,11 +39,52 @@ const createSnapshotFromHTMLSourceList = async ({ htmlSourceList, width, height,
   Array.from(document.getElementsByTagName('style'))
     .map((element) => cssFragCollector.collect(element.innerHTML, ''))
 
+  const htmlFragOutput = htmlFragCollector.getOutput()
+  const cssFragOutput = cssFragCollector.getOutput()
+
+  { // reduce unused font files
+    const fontFamilySet = new Set([
+      ...htmlFragOutput.fontInfo.fontFamilySet,
+      ...cssFragOutput.fontInfo.fontFamilySet
+    ])
+
+    Object.entries({
+      ...htmlFragOutput.fontInfo.fontFaceMap,
+      ...cssFragOutput.fontInfo.fontFaceMap
+    }).forEach(([ fontTag, urlInfoSet ]) => {
+      __DEV__ && !fontFamilySet.has(fontTag.split('|')[ 0 ]) && console.log('[DROP] font tag:', fontTag, urlInfoSet)
+      if (!fontFamilySet.has(fontTag.split('|')[ 0 ])) return urlInfoSet.forEach((urlInfo) => { urlInfo.isIgnore = true })
+
+      // reduce font files
+      // TODO: may break compatibility (do we have many?) // NOTE: prefer keep by: woff2, woff, or just the first one (ttf/otf maybe)
+      let urlInfoWoff2 = null
+      let urlInfoWoff = null
+      urlInfoSet.forEach((urlInfo) => {
+        urlInfoWoff2 = urlInfoWoff2 || (urlInfo.urlString.includes('woff2') ? urlInfo : null)
+        urlInfoWoff = urlInfoWoff || (urlInfo.urlString.includes('woff') ? urlInfo : null)
+      })
+
+      // drop others
+      let hasPickedFirst = false
+      urlInfoSet.forEach((urlInfo) => {
+        if (urlInfoWoff2 && urlInfo !== urlInfoWoff2) urlInfo.isIgnore = true
+        else if (urlInfoWoff && urlInfo !== urlInfoWoff) urlInfo.isIgnore = true
+        else {
+          urlInfo.isIgnore = hasPickedFirst
+          hasPickedFirst = true
+        }
+        __DEV__ && urlInfo.isIgnore && console.log('[DROP] font src:', urlInfo)
+      })
+    })
+  }
+
+  __DEV__ && console.warn('[createSnapshotFromHTMLSourceList]', { htmlFragOutput, cssFragOutput })
+
   let htmlString, cssString, domString, svgString, svgDataUrl, imageElement, canvasElement, pngDataUrl
   const packResult = () => ({ htmlString, cssString, domString, svgString, svgDataUrl, imageElement, canvasElement, pngDataUrl })
   try {
-    htmlString = await prepareHTMLString(await convertFragListWithUrlMap(htmlFragCollector.getOutput()))
-    cssString = await prepareCSSString(await convertFragListWithUrlMap(cssFragCollector.getOutput()))
+    htmlString = await prepareHTMLString(await convertFragListWithUrlMap(htmlFragOutput))
+    cssString = await prepareCSSString(await convertFragListWithUrlMap(cssFragOutput))
     domString = `${cssString}\n${htmlString}`
     svgString = await prepareSVGString({ domString, width, height })
 
