@@ -4,9 +4,9 @@ import { DefinePlugin } from 'webpack'
 
 import { addExitListenerSync } from 'dr-js/module/node/system/ExitListener'
 
-import { argvFlag, runMain } from 'dev-dep-tool/library/__utils__'
-import { compileWithWebpack } from 'dev-dep-tool/library/webpack'
+import { argvFlag, runMain } from 'dev-dep-tool/library/main'
 import { getLogger } from 'dev-dep-tool/library/logger'
+import { compileWithWebpack, commonFlag } from 'dev-dep-tool/library/webpack'
 
 const PATH_ROOT = resolvePath(__dirname, '..')
 const fromRoot = (...args) => resolvePath(PATH_ROOT, ...args)
@@ -35,17 +35,16 @@ export {
 `
 
 runMain(async (logger) => {
-  const mode = argvFlag('development', 'production') || 'production'
-  const profileOutput = argvFlag('profile') ? fromRoot('profile-stat-gitignore.json') : null
-  const isWatch = argvFlag('watch')
-  const isProduction = mode === 'production'
+  const { mode, isWatch, isProduction, profileOutput, assetMapOutput } = await commonFlag({ argvFlag, fromRoot, logger })
 
   const babelOption = {
     configFile: false,
     babelrc: false,
     cacheDirectory: isProduction,
     presets: [ [ '@babel/env', { targets: { node: '8.8' }, modules: false } ] ],
-    plugins: [ isProduction && [ '@babel/plugin-proposal-object-rest-spread', { loose: true, useBuiltIns: true } ] ].filter(Boolean)
+    plugins: [
+      isProduction && [ '@babel/plugin-proposal-object-rest-spread', { loose: true, useBuiltIns: true } ]
+    ].filter(Boolean)
   }
 
   const config = {
@@ -62,7 +61,7 @@ runMain(async (logger) => {
   writeFileSync(fromRoot(INDEX_FILE), INDEX_FILE_DATA)
 
   logger.log(`compile with webpack mode: ${mode}, isWatch: ${Boolean(isWatch)}`)
-  await compileWithWebpack({ config, isWatch, profileOutput, logger })
+  await compileWithWebpack({ config, isWatch, profileOutput, assetMapOutput, logger })
 
   addExitListenerSync(() => {
     logger.log(`delete ${INDEX_FILE}`)

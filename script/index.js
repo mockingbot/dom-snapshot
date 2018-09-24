@@ -2,13 +2,13 @@ import { resolve } from 'path'
 import { execSync } from 'child_process'
 
 import { binary as formatBinary } from 'dr-js/library/common/format'
-import { getFileList } from 'dr-js/library/node/file/Directory'
 
-import { argvFlag, runMain } from 'dev-dep-tool/library/__utils__'
+import { argvFlag, runMain } from 'dev-dep-tool/library/main'
 import { getLogger } from 'dev-dep-tool/library/logger'
-import { wrapFileProcessor, fileProcessorBabel } from 'dev-dep-tool/library/fileProcessor'
+import { getScriptFileListFromPathList } from 'dev-dep-tool/library/fileList'
 import { initOutput, packOutput, publishOutput } from 'dev-dep-tool/library/commonOutput'
-import { getUglifyESOption, minifyFileListWithUglifyEs } from 'dev-dep-tool/library/uglify'
+import { wrapFileProcessor, fileProcessorBabel } from 'dev-dep-tool/library/fileProcessor'
+import { getTerserOption, minifyFileListWithTerser } from 'dev-dep-tool/library/minify'
 
 const PATH_ROOT = resolve(__dirname, '..')
 const PATH_OUTPUT = resolve(__dirname, '../output-gitignore')
@@ -32,18 +32,21 @@ runMain(async (logger) => {
   logger.padLog(`build module`)
   execSync('npm run build-module', execOptionRoot)
 
+  const fileListLibrary = await getScriptFileListFromPathList([ 'library' ], fromOutput)
+  const fileListModule = await getScriptFileListFromPathList([ 'module' ], fromOutput)
+
   logger.padLog(`minify library`)
-  await minifyFileListWithUglifyEs({
-    fileList: (await getFileList(fromOutput('library'))).filter((path) => path.endsWith('.js') && !path.endsWith('.test.js')),
-    option: getUglifyESOption({ isDevelopment: false, isModule: false }),
+  await minifyFileListWithTerser({
+    fileList: fileListLibrary,
+    option: getTerserOption(),
     rootPath: PATH_OUTPUT,
     logger
   })
 
   logger.padLog(`minify module`)
-  await minifyFileListWithUglifyEs({
-    fileList: (await getFileList(fromOutput('library'))).filter((path) => path.endsWith('.js') && !path.endsWith('.test.js')),
-    option: getUglifyESOption({ isDevelopment: false, isModule: true }),
+  await minifyFileListWithTerser({
+    fileList: fileListModule,
+    option: getTerserOption({ isModule: true }),
     rootPath: PATH_OUTPUT,
     logger
   })
@@ -51,12 +54,12 @@ runMain(async (logger) => {
   logger.padLog(`process library`)
   const processBabel = wrapFileProcessor({ processor: fileProcessorBabel, logger })
   let sizeCodeReduceLibrary = 0
-  for (const filePath of await getFileList(fromOutput('library'))) sizeCodeReduceLibrary += await processBabel(filePath)
+  for (const filePath of fileListLibrary) sizeCodeReduceLibrary += await processBabel(filePath)
   logger.log(`library size reduce: ${formatBinary(sizeCodeReduceLibrary)}B`)
 
   logger.padLog(`process module`)
   let sizeCodeReduceModule = 0
-  for (const filePath of await getFileList(fromOutput('module'))) sizeCodeReduceModule += await processBabel(filePath)
+  for (const filePath of fileListModule) sizeCodeReduceModule += await processBabel(filePath)
   logger.log(`module size reduce: ${formatBinary(sizeCodeReduceModule)}B`)
 
   const pathPackagePack = await packOutput({ fromRoot, fromOutput, logger })
