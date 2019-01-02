@@ -40,7 +40,7 @@ runMain(async (logger) => {
 
   logger.padLog(`process output`)
   let sizeReduce = 0
-  sizeReduce += await minifyFileListWithTerser({ fileList: fileListLibrary, option: getTerserOption(), rootPath: PATH_OUTPUT, logger })
+  sizeReduce += await minifyFileListWithTerser({ fileList: fileListLibrary, option: getTerserOption({ ecma: 5 }), rootPath: PATH_OUTPUT, logger })
   sizeReduce += await minifyFileListWithTerser({ fileList: fileListModule, option: getTerserOption({ isReadable: true }), rootPath: PATH_OUTPUT, logger })
   sizeReduce += await processFileList({ fileList: [ ...fileListLibrary, ...fileListModule ], processor: fileProcessorBabel, rootPath: PATH_OUTPUT, logger })
   logger.log(`size reduce: ${binary(sizeReduce)}B`)

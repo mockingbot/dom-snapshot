@@ -1,10 +1,10 @@
 {
   "private": true,
   "name": "dom-snapshot",
-  "version": "0.2.1-dev.2",
+  "version": "0.2.1",
+  "description": "Get `<canvas>` from DOM string through SVG `<foreignObject>`.",
   "author": "mockingbot",
   "license": "MIT",
-  "description": "Get `<canvas>` from DOM string through SVG `<foreignObject>`.",
   "keywords": [
     "snapshot",
     "DOM",
@@ -32,7 +32,7 @@
     "prepack": "echo \"Error: pack with script-*\" && exit 1"
   },
   "devDependencies": {
-    "dr-dev": "0.0.2-dev.0",
-    "dr-dev-web": "0.0.2-dev.0"
+    "dr-dev": "0.0.3",
+    "dr-dev-web": "0.0.3"
   }
 }
