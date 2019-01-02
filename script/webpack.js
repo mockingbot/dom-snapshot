@@ -4,9 +4,9 @@ import { DefinePlugin } from 'webpack'
 
 import { addExitListenerSync } from 'dr-js/module/node/system/ExitListener'
 
-import { argvFlag, runMain } from 'dev-dep-tool/library/main'
-import { getLogger } from 'dev-dep-tool/library/logger'
-import { compileWithWebpack, commonFlag } from 'dev-dep-tool/library/webpack'
+import { argvFlag, runMain } from 'dr-dev/module/main'
+import { getLogger } from 'dr-dev/module/logger'
+import { compileWithWebpack, commonFlag } from 'dr-dev/module/webpack'
 
 const PATH_ROOT = resolvePath(__dirname, '..')
 const fromRoot = (...args) => resolvePath(PATH_ROOT, ...args)
@@ -54,7 +54,7 @@ runMain(async (logger) => {
     entry: { index: INDEX_FILE },
     resolve: { alias: { source: fromRoot('source') } },
     module: { rules: [ { test: /\.js$/, use: [ { loader: 'babel-loader', options: babelOption } ] } ] },
-    plugins: [ new DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify(mode), '__DEV__': !isProduction }) ]
+    plugins: [ new DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify(mode), '__DEV__': true }) ] // NOTE: show dev log
   }
 
   logger.log(`generate ${INDEX_FILE}`)
@@ -65,6 +65,6 @@ runMain(async (logger) => {
 
   addExitListenerSync(() => {
     logger.log(`delete ${INDEX_FILE}`)
-    unlinkSync(fromRoot(INDEX_FILE), INDEX_FILE_DATA)
+    unlinkSync(fromRoot(INDEX_FILE))
   })
 }, getLogger(`webpack`))

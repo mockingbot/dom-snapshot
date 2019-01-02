@@ -30,6 +30,7 @@ const createSnapshotFromHTMLSourceList = async ({ htmlSourceList, width, height,
   htmlSourceList.forEach((fragString) => htmlFragCollector.collect(fragString, ''))
 
   const cssFragCollector = createCSSFragCollector()
+
   const cssUrlList = Array.from(document.getElementsByTagName('link'))
     .map((element) => (element.rel === 'stylesheet' && element.href))
     .filter((href) => href)
@@ -37,7 +38,7 @@ const createSnapshotFromHTMLSourceList = async ({ htmlSourceList, width, height,
     cssFragCollector.collect(await fetchTextWithCache(cssUrl), cssUrl) // with originUrl
   }
   Array.from(document.getElementsByTagName('style'))
-    .map((element) => cssFragCollector.collect(element.innerHTML, ''))
+    .map((element) => cssFragCollector.collect(getStyleElementCSSText(element), ''))
 
   const htmlFragOutput = htmlFragCollector.getOutput()
   const cssFragOutput = cssFragCollector.getOutput()
@@ -104,6 +105,20 @@ const createSnapshotFromHTMLSourceList = async ({ htmlSourceList, width, height,
     }
   } catch (error) { __DEV__ && console.warn('[createSnapshotFromHTMLSourceList] error:', error, packResult()) }
   return packResult()
+}
+
+const getStyleElementCSSText = (element) => {
+  const { innerHTML } = element
+  if (innerHTML.length !== 0) return innerHTML
+  // in Chrome, styled-components will generate `empty` style tag and add style to `.sheet.cssRules`
+  // use CSS Object Model (CSSOM) API
+  const cssTextList = []
+  const { sheet: { cssRules } } = element
+  for (let index = 0, indexMax = cssRules.length; index < indexMax; index++) {
+    const { cssText } = cssRules[ index ]
+    cssTextList.push(cssText)
+  }
+  return cssTextList.join('\n')
 }
 
 const renderPngDataUrlFromSvgDataUrl = async ({ svgDataUrl, width, height }) => {
