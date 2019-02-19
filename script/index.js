@@ -3,13 +3,11 @@ import { execSync } from 'child_process'
 
 import { binary } from 'dr-js/module/common/format'
 
-import { argvFlag, runMain } from 'dr-dev/module/main'
-import { getLogger } from 'dr-dev/module/logger'
-import { getScriptFileListFromPathList } from 'dr-dev/module/fileList'
-import { initOutput, packOutput, publishOutput } from 'dr-dev/module/commonOutput'
+import { getScriptFileListFromPathList } from 'dr-dev/module/node/fileList'
+import { runMain, argvFlag } from 'dr-dev/module/main'
+import { initOutput, packOutput, publishOutput } from 'dr-dev/module/output'
 import { processFileList, fileProcessorBabel } from 'dr-dev/module/fileProcessor'
 import { getTerserOption, minifyFileListWithTerser } from 'dr-dev/module/minify'
-import { writeLicenseFile } from 'dr-dev/module/license'
 
 const PATH_ROOT = resolve(__dirname, '..')
 const PATH_OUTPUT = resolve(__dirname, '../output-gitignore')
@@ -22,7 +20,6 @@ runMain(async (logger) => {
   execSync(`npm run script-generate-spec`, execOptionRoot)
 
   const packageJSON = await initOutput({ fromRoot, fromOutput, logger })
-  writeLicenseFile(fromRoot('LICENSE'), packageJSON.license, 'MockingBot')
 
   if (!argvFlag('pack')) return
 
@@ -47,4 +44,4 @@ runMain(async (logger) => {
 
   const pathPackagePack = await packOutput({ fromRoot, fromOutput, logger })
   await publishOutput({ flagList: process.argv, packageJSON, pathPackagePack, extraArgs: [ '--userconfig', '~/mockingbot.npmrc' ], logger })
-}, getLogger(process.argv.slice(2).join('+'), argvFlag('quiet')))
+})

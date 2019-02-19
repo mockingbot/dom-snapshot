@@ -4,8 +4,7 @@ import { DefinePlugin } from 'webpack'
 
 import { addExitListenerSync } from 'dr-js/module/node/system/ExitListener'
 
-import { argvFlag, runMain } from 'dr-dev/module/main'
-import { getLogger } from 'dr-dev/module/logger'
+import { runMain } from 'dr-dev/module/main'
 import { compileWithWebpack, commonFlag } from 'dr-dev/module/webpack'
 
 const PATH_ROOT = resolvePath(__dirname, '..')
@@ -35,7 +34,7 @@ export {
 `
 
 runMain(async (logger) => {
-  const { mode, isWatch, isProduction, profileOutput, assetMapOutput } = await commonFlag({ argvFlag, fromRoot, logger })
+  const { mode, isWatch, isProduction, profileOutput, assetMapOutput } = await commonFlag({ fromRoot, logger })
 
   const babelOption = {
     configFile: false,
@@ -43,7 +42,7 @@ runMain(async (logger) => {
     cacheDirectory: isProduction,
     presets: [ [ '@babel/env', { targets: { node: '8.8' }, modules: false } ] ],
     plugins: [
-      isProduction && [ '@babel/plugin-proposal-object-rest-spread', { loose: true, useBuiltIns: true } ]
+      isProduction && [ '@babel/proposal-object-rest-spread', { loose: true, useBuiltIns: true } ]
     ].filter(Boolean)
   }
 
@@ -59,12 +58,11 @@ runMain(async (logger) => {
 
   logger.log(`generate ${INDEX_FILE}`)
   writeFileSync(fromRoot(INDEX_FILE), INDEX_FILE_DATA)
+  addExitListenerSync(() => { // TODO: not working in watch mode (win32)
+    logger.log(`delete ${INDEX_FILE}`)
+    try { unlinkSync(fromRoot(INDEX_FILE)) } catch {}
+  })
 
   logger.log(`compile with webpack mode: ${mode}, isWatch: ${Boolean(isWatch)}`)
   await compileWithWebpack({ config, isWatch, profileOutput, assetMapOutput, logger })
-
-  addExitListenerSync(() => {
-    logger.log(`delete ${INDEX_FILE}`)
-    unlinkSync(fromRoot(INDEX_FILE))
-  })
-}, getLogger(`webpack`))
+}, 'webpack')

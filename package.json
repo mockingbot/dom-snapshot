@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "dom-snapshot",
-  "version": "0.2.1",
+  "version": "0.2.2-dev.0",
   "description": "Get `<canvas>` from DOM string through SVG `<foreignObject>`.",
   "author": "mockingbot",
   "license": "MIT",
@@ -24,7 +24,7 @@
     "build-library-dev": "cross-env BABEL_ENV=dev npm run build-library -- --watch",
     "build-example-dev": "babel-node ./script/webpack development watch",
     "// build =======================": "",
-    "build-library": "babel ./source --out-dir ./output-gitignore/library",
+    "build-library": "cross-env BABEL_ENV=all-transform babel ./source --out-dir ./output-gitignore/library",
     "build-module": "cross-env BABEL_ENV=module babel ./source --out-dir ./output-gitignore/module",
     "build-example": "babel-node ./script/webpack production profile",
     "// =============================": "",
@@ -32,7 +32,7 @@
     "prepack": "echo \"Error: pack with script-*\" && exit 1"
   },
   "devDependencies": {
-    "dr-dev": "0.0.3",
-    "dr-dev-web": "0.0.3"
+    "dr-dev": "0.0.6-dev.3",
+    "dr-dev-web": "0.0.6-dev.3"
   }
 }
