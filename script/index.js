@@ -1,9 +1,7 @@
 import { resolve } from 'path'
 import { execSync } from 'child_process'
 
-import { binary } from 'dr-js/module/common/format'
-
-import { getScriptFileListFromPathList } from 'dr-dev/module/node/fileList'
+import { getScriptFileListFromPathList } from 'dr-dev/module/node/file'
 import { runMain, argvFlag } from 'dr-dev/module/main'
 import { initOutput, packOutput, publishOutput } from 'dr-dev/module/output'
 import { processFileList, fileProcessorBabel } from 'dr-dev/module/fileProcessor'
@@ -40,7 +38,7 @@ runMain(async (logger) => {
   sizeReduce += await minifyFileListWithTerser({ fileList: fileListLibrary, option: getTerserOption({ ecma: 5 }), rootPath: PATH_OUTPUT, logger })
   sizeReduce += await minifyFileListWithTerser({ fileList: fileListModule, option: getTerserOption({ isReadable: true }), rootPath: PATH_OUTPUT, logger })
   sizeReduce += await processFileList({ fileList: [ ...fileListLibrary, ...fileListModule ], processor: fileProcessorBabel, rootPath: PATH_OUTPUT, logger })
-  logger.log(`size reduce: ${binary(sizeReduce)}B`)
+  logger.log(`size reduce: ${sizeReduce}B`)
 
   const pathPackagePack = await packOutput({ fromRoot, fromOutput, logger })
   await publishOutput({ flagList: process.argv, packageJSON, pathPackagePack, extraArgs: [ '--userconfig', '~/mockingbot.npmrc' ], logger })

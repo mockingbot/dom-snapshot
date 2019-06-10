@@ -6,7 +6,7 @@ const isAllTransform = BABEL_ENV.includes('all-transform')
 module.exports = {
   presets: [
     [ '@babel/env', isAllTransform
-      ? { forceAllTransforms: true, modules: 'commonjs', loose: true }
+      ? { forceAllTransforms: true, modules: 'commonjs' }
       : { targets: { node: '10' }, modules: isModule ? false : 'commonjs' }
     ]
   ],

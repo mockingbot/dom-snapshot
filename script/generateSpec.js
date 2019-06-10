@@ -3,7 +3,7 @@ import { writeFileSync } from 'fs'
 
 import { collectSourceRouteMap } from 'dr-dev/module/node/export/parse'
 import { generateExportInfo } from 'dr-dev/module/node/export/generate'
-import { autoAppendMarkdownHeaderLink, renderMarkdownExportPath } from 'dr-dev/module/node/export/renderMarkdown'
+import { renderMarkdownAutoAppendHeaderLink, renderMarkdownExportPath } from 'dr-dev/module/node/export/renderMarkdown'
 import { runMain } from 'dr-dev/module/main'
 
 const PATH_ROOT = resolve(__dirname, '..')
@@ -20,7 +20,7 @@ runMain(async (logger) => {
   writeFileSync(fromRoot('SPEC.md'), [
     '# Specification',
     '',
-    ...autoAppendMarkdownHeaderLink(
+    ...renderMarkdownAutoAppendHeaderLink(
       '#### Export Path',
       ...renderMarkdownExportPath({ exportInfoMap, rootPath: PATH_ROOT })
     ),

@@ -2,7 +2,6 @@
 
 [![i:npm]][l:npm]
 [![i:size]][l:size]
-[![i:lint]][l:lint]
 [![i:npm-dev]][l:npm]
 
 Get `<canvas>` from DOM string through SVG `<foreignObject>`.
@@ -14,6 +13,15 @@ Get `<canvas>` from DOM string through SVG `<foreignObject>`.
 [l:npm]: https://npm.im/dom-snapshot
 [i:size]: https://packagephobia.now.sh/badge?p=dom-snapshot
 [l:size]: https://packagephobia.now.sh/result?p=dom-snapshot
-[i:lint]: https://img.shields.io/badge/code_style-standard-yellow.svg
-[l:lint]: https://standardjs.com
 [l:demo]: https://mockingbot.github.io/dom-snapshot
+
+[//]: # (NON_PACKAGE_CONTENT)
+
+- 📁 [source/](source/)
+  - main source code, in output package will be:
+    - `dom-snapshot/library`: for direct use, use `require() / exports.*=`, in ES5
+    - `dom-snapshot/module`: for re-pack, keep `import / export` and readability
+- 📁 [example/](example/)
+  - some example (unsorted tests)
+- 📄 [SPEC.md](SPEC.md)
+  - list of all directly accessible codes, sort of an API lockfile

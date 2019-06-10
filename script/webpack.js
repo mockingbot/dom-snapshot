@@ -2,8 +2,6 @@ import { resolve as resolvePath } from 'path'
 import { writeFileSync, unlinkSync } from 'fs'
 import { DefinePlugin } from 'webpack'
 
-import { addExitListenerSync } from 'dr-js/module/node/system/ExitListener'
-
 import { runMain } from 'dr-dev/module/main'
 import { compileWithWebpack, commonFlag } from 'dr-dev/module/webpack'
 
@@ -34,13 +32,13 @@ export {
 `
 
 runMain(async (logger) => {
-  const { mode, isWatch, isProduction, profileOutput, assetMapOutput } = await commonFlag({ fromRoot, logger })
+  const { mode, isWatch, isProduction, profileOutput } = await commonFlag({ fromRoot, logger })
 
   const babelOption = {
     configFile: false,
     babelrc: false,
     cacheDirectory: isProduction,
-    presets: [ [ '@babel/env', { targets: { node: '8.8' }, modules: false } ] ],
+    presets: [ [ '@babel/env', { targets: { node: '10' }, modules: false } ] ],
     plugins: [
       isProduction && [ '@babel/proposal-object-rest-spread', { loose: true, useBuiltIns: true } ]
     ].filter(Boolean)
@@ -58,11 +56,11 @@ runMain(async (logger) => {
 
   logger.log(`generate ${INDEX_FILE}`)
   writeFileSync(fromRoot(INDEX_FILE), INDEX_FILE_DATA)
-  addExitListenerSync(() => { // TODO: not working in watch mode (win32)
+  process.on('exit', () => { // TODO: not working in watch mode (win32)
     logger.log(`delete ${INDEX_FILE}`)
-    try { unlinkSync(fromRoot(INDEX_FILE)) } catch {}
+    try { unlinkSync(fromRoot(INDEX_FILE)) } catch (error) { __DEV__ && console.log(error) }
   })
 
   logger.log(`compile with webpack mode: ${mode}, isWatch: ${Boolean(isWatch)}`)
-  await compileWithWebpack({ config, isWatch, profileOutput, assetMapOutput, logger })
+  await compileWithWebpack({ config, isWatch, profileOutput, logger })
 }, 'webpack')
