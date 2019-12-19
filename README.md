@@ -1,6 +1,7 @@
 # DOM Snapshot
 
 [![i:npm]][l:npm]
+[![i:ci]][l:ci]
 [![i:size]][l:size]
 [![i:npm-dev]][l:npm]
 
@@ -8,9 +9,11 @@ Get `<canvas>` from DOM string through SVG `<foreignObject>`.
 
 [Online DEMO][l:demo]
 
-[i:npm]: https://img.shields.io/npm/v/dom-snapshot.svg?colorB=blue
-[i:npm-dev]: https://img.shields.io/npm/v/dom-snapshot/dev.svg
+[i:npm]: https://img.shields.io/npm/v/dom-snapshot?colorB=blue
+[i:npm-dev]: https://img.shields.io/npm/v/dom-snapshot/dev
 [l:npm]: https://npm.im/dom-snapshot
+[i:ci]: https://img.shields.io/github/workflow/status/mockingbot/dom-snapshot/ci-test
+[l:ci]: https://github.com/mockingbot/dom-snapshot/actions?query=workflow:ci-test
 [i:size]: https://packagephobia.now.sh/badge?p=dom-snapshot
 [l:size]: https://packagephobia.now.sh/result?p=dom-snapshot
 [l:demo]: https://mockingbot.github.io/dom-snapshot

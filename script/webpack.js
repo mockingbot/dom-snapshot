@@ -2,17 +2,17 @@ import { resolve as resolvePath } from 'path'
 import { writeFileSync, unlinkSync } from 'fs'
 import { DefinePlugin } from 'webpack'
 
-import { runMain } from 'dr-dev/module/main'
-import { compileWithWebpack, commonFlag } from 'dr-dev/module/webpack'
+import { compileWithWebpack, commonFlag } from '@dr-js/dev/module/webpack'
+import { runMain } from '@dr-js/dev/module/main'
 
 const PATH_ROOT = resolvePath(__dirname, '..')
 const fromRoot = (...args) => resolvePath(PATH_ROOT, ...args)
 
 const INDEX_FILE = 'source/index.example.js'
 const INDEX_FILE_DATA = `
-import * as Time from 'dr-js/module/common/time'
-import * as Format from 'dr-js/module/common/format'
-import * as Resource from 'dr-js/module/browser/resource'
+import * as Time from '@dr-js/core/module/common/time'
+import * as Format from '@dr-js/core/module/common/format'
+import * as Resource from '@dr-js/core/module/browser/resource'
 
 import * as Fetch from './fetch'
 import * as Convert from './convert'
@@ -61,6 +61,6 @@ runMain(async (logger) => {
     try { unlinkSync(fromRoot(INDEX_FILE)) } catch (error) { __DEV__ && console.log(error) }
   })
 
-  logger.log(`compile with webpack mode: ${mode}, isWatch: ${Boolean(isWatch)}`)
+  logger.padLog(`compile with webpack mode: ${mode}, isWatch: ${Boolean(isWatch)}`)
   await compileWithWebpack({ config, isWatch, profileOutput, logger })
 }, 'webpack')
