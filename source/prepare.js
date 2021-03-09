@@ -1,3 +1,5 @@
+const { document } = window
+
 const prepareHTMLString = async (convertedFragList) => convertedFragList.join('')
   .replace(/<br>/g, '<br/>') // FIX: wrong tag
   .replace(/&nbsp;/g, ' ') // FIX: svg don't support these markup

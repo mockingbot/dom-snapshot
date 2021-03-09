@@ -1,12 +1,13 @@
-import { resolve as resolvePath } from 'path'
+import { resolve } from 'path'
 import { writeFileSync, unlinkSync } from 'fs'
-import { DefinePlugin } from 'webpack'
 
 import { compileWithWebpack, commonFlag } from '@dr-js/dev/module/webpack'
 import { runMain } from '@dr-js/dev/module/main'
 
-const PATH_ROOT = resolvePath(__dirname, '..')
-const fromRoot = (...args) => resolvePath(PATH_ROOT, ...args)
+const PATH_ROOT = resolve(__dirname, '..')
+const fromRoot = (...args) => resolve(PATH_ROOT, ...args)
+
+const PATH_EXAMPLE = resolve(PATH_ROOT, './example')
 
 const INDEX_FILE = 'source/index.example.js'
 const INDEX_FILE_DATA = `
@@ -32,27 +33,7 @@ export {
 `
 
 runMain(async (logger) => {
-  const { mode, isWatch, isProduction, profileOutput } = await commonFlag({ fromRoot, logger })
-
-  const babelOption = {
-    configFile: false,
-    babelrc: false,
-    cacheDirectory: isProduction,
-    presets: [ [ '@babel/env', { targets: { node: '10' }, modules: false } ] ],
-    plugins: [
-      isProduction && [ '@babel/proposal-object-rest-spread', { loose: true, useBuiltIns: true } ]
-    ].filter(Boolean)
-  }
-
-  const config = {
-    mode,
-    bail: isProduction,
-    output: { path: fromRoot('example'), filename: '[name].js', library: 'DomSnapshot', libraryTarget: 'umd' },
-    entry: { index: INDEX_FILE },
-    resolve: { alias: { source: fromRoot('source') } },
-    module: { rules: [ { test: /\.js$/, use: [ { loader: 'babel-loader', options: babelOption } ] } ] },
-    plugins: [ new DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify(mode), '__DEV__': true }) ] // NOTE: show dev log
-  }
+  const { mode, isWatch, profileOutput, getCommonWebpackConfig } = await commonFlag({ fromRoot, logger })
 
   logger.log(`generate ${INDEX_FILE}`)
   writeFileSync(fromRoot(INDEX_FILE), INDEX_FILE_DATA)
@@ -61,6 +42,11 @@ runMain(async (logger) => {
     try { unlinkSync(fromRoot(INDEX_FILE)) } catch (error) { __DEV__ && console.log(error) }
   })
 
+  const config = getCommonWebpackConfig(({
+    output: { path: PATH_EXAMPLE, filename: '[name].js', library: 'DomSnapshot', libraryTarget: 'umd' },
+    entry: { index: INDEX_FILE }
+  }))
+
   logger.padLog(`compile with webpack mode: ${mode}, isWatch: ${Boolean(isWatch)}`)
   await compileWithWebpack({ config, isWatch, profileOutput, logger })
-}, 'webpack')
+}, 'webpack-example')

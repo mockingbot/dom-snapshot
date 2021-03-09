@@ -22,9 +22,9 @@ Get `<canvas>` from DOM string through SVG `<foreignObject>`.
 
 - 📁 [source/](source/)
   - main source code, in output package will be:
-    - `dom-snapshot/library`: for direct use, use `require() / exports.*=`, in ES5
+    - `dom-snapshot/library`: for direct use, use `require() / exports.*=`, in ES6+
     - `dom-snapshot/module`: for re-pack, keep `import / export` and readability
 - 📁 [example/](example/)
   - some example (unsorted tests)
 - 📄 [SPEC.md](SPEC.md)
-  - list of all directly accessible codes, sort of an API lockfile
+  - list of all directly accessible codes, sort of API lockfile

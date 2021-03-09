@@ -9,6 +9,8 @@ import {
   prepareCanvasElement
 } from './prepare'
 
+const { document } = window
+
 const createSnapshotFromElement = async ({ element, width, height, skipHeavyRender = false }) => {
   if (!element) throw new Error(`invalid element: ${element}`)
 

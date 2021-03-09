@@ -6,16 +6,16 @@ jobs:
   build:
     strategy:
       matrix:
-        node-version: [ 12.x, 13.x ]
+        node-version: [ 12.x, 14.x ]
 
     runs-on: ubuntu-latest
 
     steps:
       - name: Setup Git repo
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2 # https://github.com/actions/checkout
 
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v1 # https://github.com/actions/setup-node
         with:
           node-version: ${{ matrix.node-version }}
 
@@ -26,7 +26,4 @@ jobs:
           echo "npm: $(npm -v)"
 
       - run: npm ci
-
       - run: npm test
-        env:
-          CI: true
