@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="initial-scale=1" />
+  <title>Test DOM Snapshot SVG</title>
+  <link rel="stylesheet" href="resource/reset.css">
+  <style>
+    .box, .flex-row, .flex-column { max-width: 100%; max-height: 100%; }
+    .box { overflow: auto; padding: 16px; }
+    .flex-row { display: flex; flex-flow: row wrap; }
+    .flex-column { display: flex; flex-flow: column wrap; }
+    div.box { box-shadow: 0 0 0 1px #ddd; }
+  </style>
+  <style id="source-style"></style>
+</head>
+<body>
+<div class="flex-column" style="overflow: auto; width: 100vw; min-height: 100vh; align-items: center;">
+  <div class="flex-row">
+    <div class="flex-column box"><label>inline-svg</label>
+      <div id="inline-svg"></div>
+    </div>
+    <div class="flex-column box"><label>embed-remote</label>
+      <embed id="embed-remote" width="400" height="400" src="./test.svg" />
+    </div>
+    <div class="flex-column box"><label>embed-data-uri</label>
+      <embed id="embed-data-uri" width="400" height="400" src="//:0" />
+    </div>
+    <div class="flex-column box"><label>embed-blob-url</label>
+      <embed id="embed-blob-url" width="400" height="400" src="//:0" />
+    </div>
+    <div class="flex-column box"><label>svg-img-remote</label>
+      <img id="svg-img-remote" width="400" height="400" src="./test.svg" />
+    </div>
+    <div class="flex-column box"><label>svg-img-data-uri</label>
+      <img id="svg-img-data-uri" width="400" height="400" src="//:0" />
+    </div>
+    <div class="flex-column box"><label>svg-img-blob-url</label>
+      <img id="svg-img-blob-url" width="400" height="400" src="//:0" />
+    </div>
+  </div>
+  <a href="./test.svg" target="_blank">View "test.svg"</a>
+</div>
+<script>
+  setTimeout(() => {
+    const qS = (selector) => document.querySelector(selector)
+
+    qS('#inline-svg').innerHTML = TEST_SVG_STRING
+    qS('#embed-data-uri').src = `data:image/svg+xml;charset=utf8,${encodeURIComponent(TEST_SVG_STRING)}`
+    qS('#svg-img-data-uri').src = `data:image/svg+xml;charset=utf8,${encodeURIComponent(TEST_SVG_STRING)}`
+    qS('#embed-blob-url').src = URL.createObjectURL(new Blob([ TEST_SVG_STRING ], { type: 'image/svg+xml' }))
+    qS('#svg-img-blob-url').src = URL.createObjectURL(new Blob([ TEST_SVG_STRING ], { type: 'image/svg+xml' }))
+  })
+
+  const TEST_SVG_STRING = `
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="400" height="400">
+  <switch>
+    <foreignObject width="400" height="400">
+      <body xmlns="http://www.w3.org/1999/xhtml" style="font-size:8px">
+
+      <link rel="stylesheet" href="{ROOT}/resource/font/index.css" />
+      <link rel="stylesheet" href="{ROOT}/resource/font/test-redundant-fonts.css" />
+      <link rel="stylesheet" href="{ROOT}/resource/reset.css" />
+
+      <style>
+        .image-row {
+          display: flex;
+          flex-flow: row wrap;
+          max-width: 100%;
+          max-height: 100%;
+        }
+
+        .url-image {
+          margin: 24px;
+          width: 48px;
+          height: 48px;
+          background-image: url('{ROOT}/resource/Test Image.png');
+        }
+
+        .circle {
+          border-radius: 100%;
+          box-shadow: 0 0 0 5px hsl(0, 0%, 20%),
+          0 0 0 10px hsl(0, 50%, 50%),
+          0 0 15px 15px hsl(0, 0%, 0%);
+        }
+      </style>
+
+      <div id="source-html">
+        <b>Font</b>
+        <p style="font: 22px DrCoder, Roboto, Arial">Test <b>Font DrCoder</b></p>
+        <p style="font-family: 'Roboto'">Test <b>Font Roboto</b></p>
+        <p style="font-family: 'Material Icons'; font-size: 24px;">
+          <span style="color: #d62;">language</span>
+          <span style="color: #2d6;">bug_report</span>
+          <span style="color: #62d;">lightbulb_outline</span>
+        </p>
+
+        <hr />
+
+        <b>Style (url())</b>
+        <div class="image-row">
+          <div style="margin: 24px; width: 48px; height: 48px; background-image: url('{ROOT}/resource/Test Image.png')"></div>
+          <div style="margin: 24px; width: 48px; height: 48px; background-image: url('{ROOT}/resource/Test Image.png')" class="circle"></div>
+          <div class="url-image"></div>
+          <div class="url-image circle"></div>
+        </div>
+
+        <hr />
+
+        <b>Img</b>
+        <img src="{ROOT}/resource/Test%20Image.png" />
+        <b>Img (CORS)</b>
+        <img src="https://mockingbot.github.io/dom-snapshot/example/resource/Test%20Image.png" />
+        <img src="https://unpkg.com/material-design-icons/action/1x_web/ic_account_box_black_48dp.png" />
+        <img src="https://unpkg.com/material-design-icons/action/svg/production/ic_3d_rotation_48px.svg" />
+      </div>
+
+      </body>
+    </foreignObject>
+    <text font-size="24">
+      <tspan x="200" y="200" text-anchor="middle">Feature not supported</tspan>
+    </text>
+  </switch>
+</svg>
+  `.replace(/\{ROOT}/g, location.href.split('/').slice(0, -1).join('/'))
+</script>
+</body>
+</html>
