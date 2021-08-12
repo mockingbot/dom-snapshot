@@ -25,4 +25,4 @@ node_modules
 **/*-gitignore/**
 **/*-gitignore*
 
-/example/index.js
+# /example/index.js
